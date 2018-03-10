@@ -1,0 +1,68 @@
+####### System Sets #######
+set INOUT	:= IN OUT;
+
+set IMPEXP	:= IMP EXP;
+
+set LIM := LO UP FX N;
+
+include sqlite.dat;
+
+
+set TSLVL := ANNUAL SEASON WEEKLY DAYNITE;
+
+set COM_TYPE :=
+    DEM        # Demands
+    NRG        # Energy
+    MAT        # Material
+    ENV        # Environmental
+    FIN;       # Financial
+
+set PRC_GRP :=
+    XTRACT     # Extraction
+    RENEW      # Renewables (limited)
+    PRE        # Energy
+    PRW        # Material (by weight)
+    PRV        # Material (by volume)
+    REF        # Refined Products
+    ELE        # Electric Generation
+    HPL        # Heat Generation
+    CHP        # Combined Heat+Power
+    DMD        # Demand Devices
+    DISTR      # Distribution Systems
+    CORR       # Corridor Device'
+    STG        # Storage
+    NST        # Night (Off-peak) Storage
+    IRE        # Inter-region exchange (IMPort/EXPort)
+    STK        # Stockpiling
+    MISC       # Miscellaneous
+    STS        # Time-slice storage (excluding night storages)
+    ;
+
+set UPT := COLD WARM HOT;
+
+set UC_NAME :=	
+    COST DELIV TAX SUB
+    EFF NET N
+    GROWTH PERIOD PERDISC BUILDUP
+    CUMSUM CUM+ SYNC YES
+    CAPACT CAPFLO NEWFLO ONLINE
+    ANNUL INVCOST INVTAX INVSUB
+    FLO_COST FLO_DELIV FLO_SUB FLO_TAX
+    NCAP_COST NCAP_ITAX NCAP_ISUB
+    ;
+
+set UC_GRPTYPE :=
+    ACT FLO IRE CAP NCAP COMNET COMPRD COMCON UCN;
+
+set UC_COST := COST DELIV TAX SUB ANNUL;
+
+set COSTAGG :=
+    INV INVTAX INVSUB FOM FOMTAX FOMSUB COMTAX COMSUB FLOTAX FLOSUB
+    INVTAXSUB INVALL FOMTAXSUB FOMALL FIX FIXTAX FIXSUB FIXTAXSUB FIXALL
+    COMTAXSUB FLOTAXSUB ALLTAX ALLSUB ALLTAXSUB
+    ;
+
+####### Internal Sets #######	
+set OBV := OBJINV OBJFIX OBJVAR;
+
+#============================================================================

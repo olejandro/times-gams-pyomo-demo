@@ -1,0 +1,82 @@
+* ----------------------------------------------------------------------------------------------------------------
+* Utopia model: Annual timeslice level + Addition of import process of gas and residential gas/oil heating
+* + Addition of Diesel as input fuel for RHG	+ Addition of CO2 emissions directly to the processes
+* + Addition of natural gas combined-cycle power plant
+* + Changing combined-cycle power plant to backpressure CHP plant
+* + Changing BP power plant to extraction condensing turbine
+* + Adding time slices, load curves, reserve capacity, different types of availabilities
+* ----------------------------------------------------------------------------------------------------------------
+$TITLE  TIMES -- VERSION 1.0
+OPTION LIMROW=0, LIMCOL=0, SOLPRINT=OFF, ITERLIM=50000;
+OPTION RESLIM=50000, PROFILE=1, SOLVEOPT=REPLACE;
+OPTION LP=CPLEX;
+OPTION SYSOUT=ON;
+$OFFLISTING
+*$ONLISTING
+
+* activate validation to force VAR_CAP/COMPRD and "square" obj costing
+$SET VALIDATE 'NO'
+*--------------------------------------------------------------*
+* BATINCLUDE calls should all be with lower case file names!!! *
+*--------------------------------------------------------------*
+
+* initialize the environment variables
+$   SET DEBUG                          'NO'
+$   SET DUMPSOL                        'NO'
+$   SET SOLVEDA                        'YES'
+$   SET SOLANS                         'NO'
+$   SET SOLVE_NOW                      'YES'
+$   SET MODEL_NAME                     'TIMES'
+$   IF DECLARED REG      $SET STARTRUN 'RESTART'
+$   IF NOT DECLARED REG  $SET STARTRUN 'SCRATCH'
+*$SET TIMESED NO
+$   SET VDA YES
+$   SET REDUCE '0' SET VAR_UC 'YES' SET OBJANN 'YES' SET VARCOST LIN
+
+* KILL old user values if running from restart
+*$   IF DECLARED REG  $BATINCLUDE initclr.mod
+
+* merge declarations & data
+$   ONMULTI
+
+* the times-slices MUST come 1st to ensure ordering OK
+         SET   ALL_TS
+            /
+               ANNUAL 'Annual'
+               SP     'Spring'
+               SU     'Summer'
+               FA     'Fall'
+               WI     'Winter'
+               SPD    'Spring Day'
+               SPN    'Spring Night'
+               SUD    'Summer Day'
+               SUN    'Summer Night'
+               FAD    'Fall  Day'
+               FAN    'Fall  Night'
+               WID    'Winter Day'
+               WIN    'Winter Night'
+				/
+
+* perform fixed declarations
+$BATINCLUDE initsys.mod
+
+* declare the (system/user) empties
+$BATINCLUDE initmty.mod DBG
+
+* convert 0 => EPS
+*$   ONEPS
+
+* accept the actual scenario data
+$   BATINCLUDE UTOPIA.dd
+
+$   SET RUN_NAME      'UTOPIA'
+;
+
+OPTION CLEAR=COM_PEAK;
+g_dyear = 1988.5;
+
+
+* do the rest
+$   BATINCLUDE maindrv.mod mod
+
+

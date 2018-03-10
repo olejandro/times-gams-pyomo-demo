@@ -1,0 +1,2142 @@
+* ----------------------------------------------------------------------------------------------------------------
+* Utopia model: Annual timeslice level	+ Addition of import process of gas and residential gas/oil heating
+* + Addition of Diesel as input fuel for RHG + Addition of CO2 emissions directly to the processes
+* + Addition of natural gas combined-cycle power plant
+* + Changing combined-cycle power plant to backpressure CHP plant
+* + Changing BP power plant to extraction condensing turbine
+* + Adding time slices, load curves, reserve capacity, different types of availabilities
+* ----------------------------------------------------------------------------------------------------------------
+
+$ONEMPTY
+$SET SCENARIO_NAME 'BASE'
+
+SET ALL_REG
+/
+REG
+IMPEXP
+MINRNW
+/;
+
+SET REG(ALL_REG)
+/
+REG
+/;
+
+*SET ALL_TS
+*/
+*ANNUAL
+*SP
+*SU
+*FA
+*WI		
+*SPD
+*SUD
+*FAD
+*WID	
+*SPN
+*SUN
+*FAN
+*WIN	
+*/;
+
+SET TS_GROUP(ALL_REG,TSLVL,ALL_TS)
+/
+REG       .ANNUAL   .ANNUAL
+REG       .SEASON   .SP
+REG       .SEASON   .SU
+REG       .SEASON   .FA
+REG       .SEASON   .WI
+REG       .DAYNITE  .SPD
+REG       .DAYNITE  .SUD
+REG       .DAYNITE  .FAD
+REG       .DAYNITE  .WID
+REG       .DAYNITE  .SPN
+REG       .DAYNITE  .SUN
+REG       .DAYNITE  .FAN
+REG       .DAYNITE  .WIN
+/;
+
+SET TS_MAP(ALL_REG,ALL_TS,ALL_TS)
+/
+REG       .ANNUAL    .SP
+REG       .ANNUAL    .SU
+REG       .ANNUAL    .FA
+REG       .ANNUAL    .WI
+REG       .SP        .SPD
+REG       .SP        .SPN
+REG       .SU        .SUD
+REG       .SU        .SUN
+REG       .FA        .FAD
+REG       .FA        .FAN
+REG       .WI        .WID
+REG       .WI        .WIN
+/;
+
+PARAMETER G_YRFR(ALL_REG,TS)
+/
+REG       .SP              0.250
+REG       .SU              0.250
+REG       .FA              0.250
+REG       .WI              0.250
+REG       .SPD             0.167
+REG       .SPN             0.083
+REG       .SUD             0.180
+REG       .SUN             0.070
+REG       .FAD             0.167
+REG       .FAN             0.083
+REG       .WID             0.110
+REG       .WIN             0.140
+/;
+
+SET PASTYEAR(ALLYEAR)
+/
+1916
+1956
+1966
+1976
+1981
+1985
+/;
+
+SET DATAYEAR(ALLYEAR)
+/
+1916
+1956
+1966
+1976
+1981
+1985
+1990
+2000
+2010
+/;
+
+SET MODLYEAR(ALLYEAR)
+/
+1916
+1956
+1966
+1976
+1981
+1985
+1990
+2000
+2010
+/;
+
+SET MILESTONYR(ALLYEAR)
+/
+1990
+2000
+2010
+/;
+
+PARAMETER B(ALLYEAR)
+/
+1990                                                                           1.98600E+3
+2000                                                                           1.99600E+3
+2010                                                                           2.00600E+3
+/;
+
+PARAMETER D(ALLYEAR)
+/
+1990                                                                           1.00000E+1
+2000                                                                           1.00000E+1
+2010                                                                           1.00000E+1
+/;
+
+PARAMETER E(ALLYEAR)
+/
+1990                                                                           1.99500E+3
+2000                                                                           2.00500E+3
+2010                                                                           2.01500E+3
+/;
+
+PARAMETER M(ALLYEAR)
+/
+1990                                                                           1.99000E+3
+2000                                                                           2.00000E+3
+2010                                                                           2.01000E+3
+/;
+
+SET CUR
+/
+CUR
+/;
+
+PARAMETER G_DRATE(REG,ALLYEAR,CUR)
+/
+REG       .1990     .CUR                                                       0.05000000
+REG       .2000     .CUR                                                       0.05000000
+REG       .2010     .CUR                                                       0.05000000
+/;
+
+SET COM_GRP
+/
+DEM       'Demands'
+NRG       'Energy'
+MAT       'Material'
+ENV       'Environmental Indicators'
+FIN       'Financial'
+ELC       'Electricity                             '
+DSL       'Diesel                                  '
+GSL       'Gasoline                                '
+HCO       'Coal                                    '
+HYD       'Hydro Power                             '
+OIL       'Oil                                     '
+URN       'Natural Uranium                         '
+CO2       'Carbon Dioxide                          '
+RH        'Residential Space Heating               '
+RL        'Residential Lighting                    '
+TX        'Automobile Transportation               '
+SRE       '                                        '
+/;
+
+SET COM(COM_GRP)
+/
+ELC       'Electricity                             '
+DSL       'Diesel                                  '
+GSL       'Gasoline                                '
+HCO       'Coal                                    '
+HYD       'Hydro Power                             '
+OIL       'Oil                                     '
+URN       'Natural Uranium                         '
+CO2       'Carbon Dioxide                          '
+RH        'Residential Space Heating               '
+RL        'Residential Lighting                    '
+TX        'Automobile Transportation               '
+/;
+
+SET COM_TSL(REG,COM,TSLVL)
+/
+REG       .ELC      .DAYNITE
+REG       .DSL      .ANNUAL
+REG       .GSL      .ANNUAL
+REG       .HCO      .ANNUAL
+REG       .HYD      .ANNUAL
+REG       .OIL      .ANNUAL
+REG       .URN      .ANNUAL
+REG       .CO2      .ANNUAL
+REG       .RH       .ANNUAL
+REG       .RL       .ANNUAL
+REG       .TX       .ANNUAL
+/;
+
+SET COM_TMAP(REG,COM_TYPE,COM)
+/
+REG       .DEM      .RH
+REG       .DEM      .RL
+REG       .DEM      .TX
+REG       .NRG      .ELC
+REG       .NRG      .DSL
+REG       .NRG      .GSL
+REG       .NRG      .HCO
+REG       .NRG      .HYD
+REG       .NRG      .OIL
+REG       .NRG      .URN
+REG       .ENV      .CO2
+/;
+
+SET NRG_TMAP(REG,NRG_TYPE,COM)
+/
+REG       .ELC      .ELC
+REG       .FOSSIL   .DSL
+REG       .FOSSIL   .GSL
+REG       .FOSSIL   .HCO
+REG       .FOSSIL   .OIL
+REG       .NUCLR    .URN
+REG       .FRERENEW .HYD
+/;
+
+SET DEM_SMAP(REG,DEM_SECT,COM)
+/
+REG       .RES      .RH
+REG       .RES      .RL
+REG       .TRN      .TX
+/;
+
+SET COM_UNIT(REG,COM,UNITS_COM)
+/
+REG       .ELC      .PJ
+REG       .DSL      .PJ
+REG       .GSL      .PJ
+REG       .HCO      .PJ
+REG       .HYD      .PJ
+REG       .OIL      .PJ
+REG       .URN      .PJ
+REG       .CO2      .kt
+/;
+
+PARAMETER COM_IE(REG,ALLYEAR,COM,TS)
+/
+REG       .1990     .ELC      .ANNUAL                                          1.00000000
+REG       .2000     .ELC      .ANNUAL                                          1.00000000
+REG       .2010     .ELC      .ANNUAL                                          1.00000000
+REG       .1990     .DSL      .ANNUAL                                          1.00000000
+REG       .2000     .DSL      .ANNUAL                                          1.00000000
+REG       .2010     .DSL      .ANNUAL                                          1.00000000
+REG       .1990     .GSL      .ANNUAL                                          1.00000000
+REG       .2000     .GSL      .ANNUAL                                          1.00000000
+REG       .2010     .GSL      .ANNUAL                                          1.00000000
+REG       .1990     .HCO      .ANNUAL                                          1.00000000
+REG       .2000     .HCO      .ANNUAL                                          1.00000000
+REG       .2010     .HCO      .ANNUAL                                          1.00000000
+REG       .1990     .HYD      .ANNUAL                                          1.00000000
+REG       .2000     .HYD      .ANNUAL                                          1.00000000
+REG       .2010     .HYD      .ANNUAL                                          1.00000000
+REG       .1990     .OIL      .ANNUAL                                          1.00000000
+REG       .2000     .OIL      .ANNUAL                                          1.00000000
+REG       .2010     .OIL      .ANNUAL                                          1.00000000
+REG       .1990     .URN      .ANNUAL                                          1.00000000
+REG       .2000     .URN      .ANNUAL                                          1.00000000
+REG       .2010     .URN      .ANNUAL                                          1.00000000
+/;
+
+PARAMETER COM_PROJ(REG,ALLYEAR,COM)
+/
+REG       .1990     .RH                                                                                  2.52000E+1
+REG       .2000     .RH                                                                                  3.78000E+1
+REG       .2010     .RH                                                                                  5.67000E+1
+REG       .1990     .RL                                                                                  5.60000000
+REG       .2000     .RL                                                                                  8.40000000
+REG       .2010     .RL                                                                                  1.26000E+1
+REG       .1990     .TX                                                                                  5.20000000
+REG       .2000     .TX                                                                                  7.80000000
+REG       .2010     .TX                                                                                  1.16900E+1
+/;
+
+SET PRC
+/
+SRE       'Oil Refinery                            '
+E01       'Coal Steam Electric                     '
+E21       'LWR Nuclear Plant                       '
+E31       'Hydro-electric Plant                    '
+E51       'Pumped Storage Power Plant              '
+E70       'Oil Plant                               '
+RHE       'Electric Boiler                         '
+RHO       'Diesel Boiler                           '
+RL1       'Standard Incandescent Lighting          '
+TXD       'Diesel Car                              '
+TXE       'Electric Car                            '
+TXG       'Gasoline Car                            '
+IMPDSL1   'Import of Diesel                        '
+IMPGSL1   'Import of Gasoline                      '
+IMPHCO1   'Import of Hard Coal                     '
+IMPOIL1   'Import of Crude                         '
+IMPURN1   'Import of Uranium                       '
+/;
+
+SET PRC
+/
+SRE       'Oil Refinery                            '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .SRE           .DSL           .OUT
+REG            .SRE           .GSL           .OUT
+REG            .SRE           .OIL           .IN
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .SRE           .SRE           .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .SRE           .DSL
+REG            .SRE           .GSL
+REG            .SRE           .OIL
+REG            .SRE           .SRE
+/;
+
+SET COM_GMAP(REG,COM_GRP,COM)
+/
+REG       .SRE       .DSL
+REG       .SRE       .GSL
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .SRE           .ANNUAL
+/;
+
+SET PRC_MAP(REG,PRC_GRP,PRC)
+/
+REG            .PRE           .SRE
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .SRE                                                                 1.00000000
+/;
+
+PARAMETER FLO_SHAR(REG,ALLYEAR,PRC,COM,COM_GRP,TS,BD)
+/
+REG            .1990          .SRE           .GSL           .SRE           .ANNUAL        .FX                           0.30000000
+REG            .2000          .SRE           .GSL           .SRE           .ANNUAL        .FX                           0.30000000
+REG            .2010          .SRE           .GSL           .SRE           .ANNUAL        .FX                           0.30000000
+/;
+
+PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+/
+REG            .1990          .SRE           .SRE           .OIL           .ANNUAL                                      1.00000000
+REG            .2000          .SRE           .SRE           .OIL           .ANNUAL                                      1.00000000
+REG            .2010          .SRE           .SRE           .OIL           .ANNUAL                                      1.00000000
+/;
+
+PARAMETER NCAP_AF(REG,ALLYEAR,PRC,TS,BD)
+/
+REG            .1990          .SRE           .ANNUAL        .UP                                                         1.00000000
+REG            .2000          .SRE           .ANNUAL        .UP                                                         1.00000000
+REG            .2010          .SRE           .ANNUAL        .UP                                                         1.00000000
+/;
+
+PARAMETER CAP_BND(REG,ALLYEAR,PRC,BD)
+/
+REG            .1990          .SRE           .LO                                                                        0.10000000
+REG            .2000          .SRE           .LO                                                                        EPS
+REG            .2010          .SRE           .LO                                                                        EPS
+/;
+
+PARAMETER NCAP_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .SRE           .CUR                                                                       1.00000E+2
+REG            .2000          .SRE           .CUR                                                                       1.00000E+2
+REG            .2010          .SRE           .CUR                                                                       1.00000E+2
+/;
+
+PARAMETER ACT_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .SRE           .CUR                                                                       1.00000E+1
+REG            .2000          .SRE           .CUR                                                                       1.00000E+1
+REG            .2010          .SRE           .CUR                                                                       1.00000E+1
+/;
+
+PARAMETER NCAP_TLIFE(REG,ALLYEAR,PRC)
+/
+REG            .1990          .SRE                                                                                      5.00000E+1
+REG            .2000          .SRE                                                                                      5.00000E+1
+REG            .2010          .SRE                                                                                      5.00000E+1
+/;
+
+SET PRC
+/
+E01       'Coal Steam Electric                     '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .E01           .ELC           .OUT
+REG            .E01           .HCO           .IN
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .E01           .ELC           .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .E01           .ELC
+REG            .E01           .HCO
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .E01           .DAYNITE
+/;
+
+SET PRC_MAP(REG,PRC_GRP,PRC)
+/
+REG            .ELE           .E01
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .E01                                                                 3.15400E+1
+/;
+
+PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+/
+REG            .1990          .E01           .HCO           .ELC           .ANNUAL                                      0.32000000
+REG            .2000          .E01           .HCO           .ELC           .ANNUAL                                      0.32000000
+REG            .2010          .E01           .HCO           .ELC           .ANNUAL                                      0.32000000
+/;
+
+*PARAMETER NCAP_AF(REG,ALLYEAR,PRC,TS,BD)
+*/
+*REG            .1990          .E01           .ANNUAL        .UP                                                         0.80000000
+*REG            .2000          .E01           .ANNUAL        .UP                                                         0.80000000
+*REG            .2010          .E01           .ANNUAL        .UP                                                         0.80000000
+*/;
+
+PARAMETER NCAP_FOM(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E01           .CUR                                                                       4.00000E+1
+REG            .2000          .E01           .CUR                                                                       7.00000E+1
+REG            .2010          .E01           .CUR                                                                       1.00000E+2
+/;
+
+PARAMETER NCAP_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E01           .CUR                                                                       1.40000E+3
+REG            .2000          .E01           .CUR                                                                       1.30000E+3
+REG            .2010          .E01           .CUR                                                                       1.20000E+3
+/;
+
+PARAMETER ACT_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E01           .CUR                                                                       0.30000000
+REG            .2000          .E01           .CUR                                                                       0.30000000
+REG            .2010          .E01           .CUR                                                                       0.30000000
+/;
+
+PARAMETER NCAP_TLIFE(REG,ALLYEAR,PRC)
+/
+REG            .1956          .E01                                                                                      4.00000E+1
+REG            .1966          .E01                                                                                      4.00000E+1
+REG            .1976          .E01                                                                                      4.00000E+1
+REG            .1990          .E01                                                                                      4.00000E+1
+REG            .2000          .E01                                                                                      4.00000E+1
+REG            .2010          .E01                                                                                      4.00000E+1
+/;
+
+PARAMETER NCAP_PASTI(REG,ALLYEAR,PRC)
+/
+REG            .1956          .E01                                                                                      0.17500000
+REG            .1966          .E01                                                                                      0.17500000
+REG            .1976          .E01                                                                                      0.15000000
+/;
+
+SET PRC
+/
+E21       'LWR Nuclear Plant                       '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .E21           .ELC           .OUT
+REG            .E21           .URN           .IN
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .E21           .ELC           .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .E21           .ELC
+REG            .E21           .URN
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .E21           .SEASON
+/;
+
+SET PRC_MAP(REG,PRC_GRP,PRC)
+/
+REG            .ELE           .E21
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .E21                                                                 3.15400E+1
+/;
+
+PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+/
+REG            .1990          .E21           .URN           .ELC           .ANNUAL                                      0.40000000
+REG            .2000          .E21           .URN           .ELC           .ANNUAL                                      0.40000000
+REG            .2010          .E21           .URN           .ELC           .ANNUAL                                      0.40000000
+/;
+
+PARAMETER NCAP_AF(REG,ALLYEAR,PRC,TS,BD)
+/
+REG            .1990          .E21           .ANNUAL        .UP                                                         0.80000000
+REG            .2000          .E21           .ANNUAL        .UP                                                         0.80000000
+REG            .2010          .E21           .ANNUAL        .UP                                                         0.80000000
+/;
+
+PARAMETER NCAP_FOM(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E21           .CUR                                                                       5.00000E+2
+REG            .2000          .E21           .CUR                                                                       5.00000E+2
+REG            .2010          .E21           .CUR                                                                       5.00000E+2
+/;
+
+PARAMETER NCAP_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E21           .CUR                                                                       5.00000E+3
+REG            .2000          .E21           .CUR                                                                       5.00000E+3
+REG            .2010          .E21           .CUR                                                                       5.00000E+3
+/;
+
+PARAMETER ACT_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E21           .CUR                                                                       1.50000000
+REG            .2000          .E21           .CUR                                                                       1.50000000
+REG            .2010          .E21           .CUR                                                                       1.50000000
+/;
+
+PARAMETER NCAP_TLIFE(REG,ALLYEAR,PRC)
+/
+REG            .1990          .E21                                                                                      4.00000E+1
+REG            .2000          .E21                                                                                      4.00000E+1
+REG            .2010          .E21                                                                                      4.00000E+1
+/;
+
+SET PRC
+/
+E31       'Hydro-electric Plant                    '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .E31           .ELC           .OUT
+REG            .E31           .HYD           .IN
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .E31           .ELC           .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .E31           .ELC
+REG            .E31           .HYD
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .E31           .DAYNITE
+/;
+
+SET PRC_MAP(REG,PRC_GRP,PRC)
+/
+REG            .ELE           .E31
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .E31                                                                 3.15400E+1
+/;
+
+PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+/
+REG            .1990          .E31           .HYD           .ELC           .ANNUAL                                      0.32000000
+REG            .2000          .E31           .HYD           .ELC           .ANNUAL                                      0.32000000
+REG            .2010          .E31           .HYD           .ELC           .ANNUAL                                      0.32000000
+/;
+
+*PARAMETER NCAP_AF(REG,ALLYEAR,PRC,TS,BD)
+*/
+*REG            .1990          .E31           .ANNUAL        .UP                                                         0.27500000
+*REG            .2000          .E31           .ANNUAL        .UP                                                         0.27530000
+*REG            .2010          .E31           .ANNUAL        .UP                                                         0.27560000
+*/;
+
+PARAMETER CAP_BND(REG,ALLYEAR,PRC,BD)
+/
+REG            .1990          .E31           .LO                                                                        0.13000000
+REG            .1990          .E31           .UP                                                                        0.13000000
+REG            .2000          .E31           .LO                                                                        0.13000000
+REG            .2000          .E31           .UP                                                                        0.17000000
+REG            .2010          .E31           .LO                                                                        0.13000000
+REG            .2010          .E31           .UP                                                                        0.21000000
+/;
+
+PARAMETER NCAP_FOM(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E31           .CUR                                                                       7.50000E+1
+REG            .2000          .E31           .CUR                                                                       7.50000E+1
+REG            .2010          .E31           .CUR                                                                       7.50000E+1
+/;
+
+PARAMETER NCAP_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E31           .CUR                                                                       3.00000E+3
+REG            .2000          .E31           .CUR                                                                       3.00000E+3
+REG            .2010          .E31           .CUR                                                                       3.00000E+3
+/;
+
+PARAMETER NCAP_TLIFE(REG,ALLYEAR,PRC)
+/
+REG            .1916          .E31                                                                                      1.00000E+2
+REG            .1990          .E31                                                                                      1.00000E+2
+REG            .2000          .E31                                                                                      1.00000E+2
+REG            .2010          .E31                                                                                      1.00000E+2
+/;
+
+PARAMETER NCAP_PASTI(REG,ALLYEAR,PRC)
+/
+REG            .1916          .E31                                                                                      0.10000000
+/;
+
+SET PRC
+/
+E51       'Pumped Storage Power Plant              '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .E51           .ELC           .IN
+REG            .E51           .ELC           .OUT
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .E51           .ELC           .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .E51           .ELC
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .E51           .DAYNITE
+/;
+
+SET PRC_STGTSS(REG,PRC,COM)
+/
+REG            .E51           .ELC
+/;
+
+SET PRC_MAP(REG,PRC_GRP,PRC)
+/
+REG            .ELE           .E51
+REG            .STG           .E51
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .E51                                                                 1
+/;
+
+PARAMETER NCAP_AF(REG,ALLYEAR,PRC,TS,BD)
+/
+REG            .1990          .E51           .ANNUAL        .UP                                                         1
+REG            .2000          .E51           .ANNUAL        .UP                                                         1
+REG            .2010          .E51           .ANNUAL        .UP                                                         1
+/;
+
+PARAMETER CAP_BND(REG,ALLYEAR,PRC,BD)
+/
+REG            .1990          .E51           .UP                                                                        3.00000000
+REG            .2000          .E51           .UP                                                                        3.00000000
+REG            .2010          .E51           .UP                                                                        3.00000000
+/;
+
+PARAMETER NCAP_FOM(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E51           .CUR                                                                       3.00000E+1
+REG            .2000          .E51           .CUR                                                                       3.00000E+1
+REG            .2010          .E51           .CUR                                                                       3.00000E+1
+/;
+
+PARAMETER NCAP_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E51           .CUR                                                                       9.00000E+2
+REG            .2000          .E51           .CUR                                                                       9.00000E+2
+REG            .2010          .E51           .CUR                                                                       9.00000E+2
+/;
+
+PARAMETER NCAP_TLIFE(REG,ALLYEAR,PRC)
+/
+REG            .1916          .E51                                                                                      1.00000E+2
+REG            .1990          .E51                                                                                      1.00000E+2
+REG            .2000          .E51                                                                                      1.00000E+2
+REG            .2010          .E51                                                                                      1.00000E+2
+/;
+
+PARAMETER NCAP_PASTI(REG,ALLYEAR,PRC)
+/
+REG            .1916          .E51                                                                                      0.50000000
+/;
+
+PARAMETER STG_EFF(REG,ALLYEAR,PRC)
+/
+REG            .1990          .E51                                                                                      0.71999424
+REG            .2000          .E51                                                                                      0.71999424
+REG            .2010          .E51                                                                                      0.71999424
+/;
+
+SET PRC
+/
+E70       'Oil Plant                               '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .E70           .ELC           .OUT
+REG            .E70           .DSL           .IN
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .E70           .ELC           .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .E70           .ELC
+REG            .E70           .DSL
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .E70           .DAYNITE
+/;
+
+SET PRC_MAP(REG,PRC_GRP,PRC)
+/
+REG            .ELE           .E70
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .E70                                                                 3.15400E+1
+/;
+
+PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+/
+REG            .1990          .E70           .DSL           .ELC           .ANNUAL                                      0.29411765
+REG            .2000          .E70           .DSL           .ELC           .ANNUAL                                      0.29411765
+REG            .2010          .E70           .DSL           .ELC           .ANNUAL                                      0.29411765
+/;
+
+*PARAMETER NCAP_AF(REG,ALLYEAR,PRC,TS,BD)
+*/
+*REG            .1990          .E70           .ANNUAL        .UP                                                         0.80000000
+*REG            .2000          .E70           .ANNUAL        .UP                                                         0.80000000
+*REG            .2010          .E70           .ANNUAL        .UP                                                         0.80000000
+*/;
+
+PARAMETER NCAP_FOM(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E70           .CUR                                                                       3.00000E+1
+REG            .2000          .E70           .CUR                                                                       3.00000E+1
+REG            .2010          .E70           .CUR                                                                       3.00000E+1
+/;
+
+PARAMETER NCAP_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E70           .CUR                                                                       1.00000E+3
+REG            .2000          .E70           .CUR                                                                       1.00000E+3
+REG            .2010          .E70           .CUR                                                                       1.00000E+3
+/;
+
+PARAMETER ACT_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E70           .CUR                                                                       0.40000000
+REG            .2000          .E70           .CUR                                                                       0.40000000
+REG            .2010          .E70           .CUR                                                                       0.40000000
+/;
+
+PARAMETER NCAP_TLIFE(REG,ALLYEAR,PRC)
+/
+REG            .1956          .E70                                                                                      4.00000E+1
+REG            .1966          .E70                                                                                      4.00000E+1
+REG            .1976          .E70                                                                                      4.00000E+1
+REG            .1990          .E70                                                                                      4.00000E+1
+REG            .2000          .E70                                                                                      4.00000E+1
+REG            .2010          .E70                                                                                      4.00000E+1
+/;
+
+PARAMETER NCAP_PASTI(REG,ALLYEAR,PRC)
+/
+REG            .1956          .E70                                                                                      0.05000000
+REG            .1966          .E70                                                                                      0.05000000
+REG            .1976          .E70                                                                                      0.20000000
+/;
+
+SET PRC
+/
+RHE       'Electric Boiler                         '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .RHE           .ELC           .IN
+REG            .RHE           .RH            .OUT
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .RHE           .RH            .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .RHE           .ELC
+REG            .RHE           .RH
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .RHE           .ANNUAL
+/;
+
+SET PRC_MAP(REG,PRC_GRP,PRC)
+/
+REG            .DMD           .RHE
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .RHE                                                                 1.00000000
+/;
+
+PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+/
+REG            .1990          .RHE           .ELC           .RH            .ANNUAL                                      1.00000000
+REG            .2000          .RHE           .ELC           .RH            .ANNUAL                                      1.00000000
+REG            .2010          .RHE           .ELC           .RH            .ANNUAL                                      1.00000000
+/;
+
+PARAMETER NCAP_BND
+/
+REG            .1990          .RHE           .UP                                                                        EPS
+/;
+
+PARAMETER NCAP_AF(REG,ALLYEAR,PRC,TS,BD)
+/
+REG            .1990          .RHE           .ANNUAL        .UP                                                         1.00000000
+REG            .2000          .RHE           .ANNUAL        .UP                                                         1.00000000
+REG            .2010          .RHE           .ANNUAL        .UP                                                         1.00000000
+/;
+
+PARAMETER NCAP_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .RHE           .CUR                                                                       1.20000E+1
+REG            .2000          .RHE           .CUR                                                                       1.20000E+1
+REG            .2010          .RHE           .CUR                                                                       1.20000E+1
+/;
+
+PARAMETER NCAP_TLIFE(REG,ALLYEAR,PRC)
+/
+REG            .1990          .RHE                                                                                      3.00000E+1
+REG            .2000          .RHE                                                                                      3.00000E+1
+REG            .2010          .RHE                                                                                      3.00000E+1
+/;
+
+SET PRC
+/
+RHO       'Diesel Boiler                           '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .RHO           .DSL           .IN
+REG            .RHO           .RH            .OUT
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .RHO           .RH            .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .RHO           .DSL
+REG            .RHO           .RH
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .RHO           .ANNUAL
+/;
+
+SET PRC_MAP(REG,PRC_GRP,PRC)
+/
+REG            .DMD           .RHO
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .RHO                                                                 1.00000000
+/;
+
+PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+/
+REG            .1990          .RHO           .DSL           .RH            .ANNUAL                                      0.70000000
+REG            .2000          .RHO           .DSL           .RH            .ANNUAL                                      0.70000000
+REG            .2010          .RHO           .DSL           .RH            .ANNUAL                                      0.70000000
+/;
+
+PARAMETER NCAP_AF(REG,ALLYEAR,PRC,TS,BD)
+/
+REG            .1990          .RHO           .ANNUAL        .UP                                                         1.00000000
+REG            .2000          .RHO           .ANNUAL        .UP                                                         1.00000000
+REG            .2010          .RHO           .ANNUAL        .UP                                                         1.00000000
+/;
+
+PARAMETER NCAP_FOM(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .RHO           .CUR                                                                       0.10000000
+REG            .2000          .RHO           .CUR                                                                       0.10000000
+REG            .2010          .RHO           .CUR                                                                       0.10000000
+/;
+
+PARAMETER NCAP_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .RHO           .CUR                                                                       1.500000E+1
+REG            .2000          .RHO           .CUR                                                                       1.500000E+1
+REG            .2010          .RHO           .CUR                                                                       1.500000E+1
+/;
+
+PARAMETER NCAP_TLIFE(REG,ALLYEAR,PRC)
+/
+REG            .1966          .RHO                                                                                      3.00000E+1
+REG            .1976          .RHO                                                                                      3.00000E+1
+REG            .1990          .RHO                                                                                      3.00000E+1
+REG            .2000          .RHO                                                                                      3.00000E+1
+REG            .2010          .RHO                                                                                      3.00000E+1
+/;
+
+PARAMETER NCAP_PASTI(REG,ALLYEAR,PRC)
+/
+REG            .1966          .RHO                                                                                      1.25000E+1
+REG            .1976          .RHO                                                                                      1.25000E+1
+/;
+
+SET PRC
+/
+RL1       'Standard Incandescent Lighting          '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .RL1           .ELC           .IN
+REG            .RL1           .RL            .OUT
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .RL1           .RL            .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .RL1           .ELC
+REG            .RL1           .RL
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .RL1           .ANNUAL
+/;
+
+SET PRC_MAP(REG,PRC_GRP,PRC)
+/
+REG            .DMD           .RL1
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .RL1                                                                 1.00000000
+/;
+
+PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+/
+REG            .1990          .RL1           .ELC           .RL            .ANNUAL                                      1.00000000
+REG            .2000          .RL1           .ELC           .RL            .ANNUAL                                      1.00000000
+REG            .2010          .RL1           .ELC           .RL            .ANNUAL                                      1.00000000
+/;
+
+PARAMETER NCAP_AF(REG,ALLYEAR,PRC,TS,BD)
+/
+REG            .1990          .RL1           .ANNUAL        .UP                                                         1.00000000
+REG            .2000          .RL1           .ANNUAL        .UP                                                         1.00000000
+REG            .2010          .RL1           .ANNUAL        .UP                                                         1.00000000
+/;
+
+PARAMETER NCAP_FOM(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .RL1           .CUR                                                                       9.46000000
+REG            .2000          .RL1           .CUR                                                                       9.46000000
+REG            .2010          .RL1           .CUR                                                                       9.46000000
+/;
+
+PARAMETER NCAP_TLIFE(REG,ALLYEAR,PRC)
+/
+REG            .1985          .RL1                                                                                      1.00000E+1
+REG            .1990          .RL1                                                                                      1.00000E+1
+REG            .2000          .RL1                                                                                      1.00000E+1
+REG            .2010          .RL1                                                                                      1.00000E+1
+/;
+
+PARAMETER NCAP_PASTI(REG,ALLYEAR,PRC)
+/
+REG            .1985          .RL1                                                                                      5.60000000
+/;
+
+SET PRC
+/
+TXD       'Diesel Car                              '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .TXD           .DSL           .IN
+REG            .TXD           .TX            .OUT
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .TXD           .TX            .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .TXD           .DSL
+REG            .TXD           .TX
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .TXD           .ANNUAL
+/;
+
+SET PRC_MAP(REG,PRC_GRP,PRC)
+/
+REG            .DMD           .TXD
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .TXD                                                                 1.00000000
+/;
+
+PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+/
+REG            .1990          .TXD           .DSL           .TX            .ANNUAL                                      0.23100000
+REG            .2000          .TXD           .DSL           .TX            .ANNUAL                                      0.23100000
+REG            .2010          .TXD           .DSL           .TX            .ANNUAL                                      0.23100000
+/;
+
+PARAMETER NCAP_AF(REG,ALLYEAR,PRC,TS,BD)
+/
+REG            .1990          .TXD           .ANNUAL        .UP                                                         1.00000000
+REG            .2000          .TXD           .ANNUAL        .UP                                                         1.00000000
+REG            .2010          .TXD           .ANNUAL        .UP                                                         1.00000000
+/;
+
+PARAMETER NCAP_FOM(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .TXD           .CUR                                                                       5.20000E+1
+REG            .2000          .TXD           .CUR                                                                       5.20000E+1
+REG            .2010          .TXD           .CUR                                                                       5.20000E+1
+/;
+
+PARAMETER NCAP_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .TXD           .CUR                                                                       1.04400E+3
+REG            .2000          .TXD           .CUR                                                                       1.04400E+3
+REG            .2010          .TXD           .CUR                                                                       1.04400E+3
+/;
+
+PARAMETER NCAP_TLIFE(REG,ALLYEAR,PRC)
+/
+REG            .1981          .TXD                                                                                      1.50000E+1
+REG            .1985          .TXD                                                                                      2.10000E+1
+REG            .1990          .TXD                                                                                      1.50000E+1
+REG            .2000          .TXD                                                                                      1.50000E+1
+REG            .2010          .TXD                                                                                      1.50000E+1
+/;
+
+PARAMETER NCAP_PASTI(REG,ALLYEAR,PRC)
+/
+REG            .1981          .TXD                                                                                      0.40000000
+REG            .1985          .TXD                                                                                      0.20000000
+/;
+
+SET PRC
+/
+TXE       'Electric Car                            '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .TXE           .ELC           .IN
+REG            .TXE           .TX            .OUT
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .TXE           .TX            .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .TXE           .ELC
+REG            .TXE           .TX
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .TXE           .ANNUAL
+/;
+
+SET PRC_MAP(REG,PRC_GRP,PRC)
+/
+REG            .DMD           .TXE
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .TXE                                                                 1.00000000
+/;
+
+PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+/
+REG            .1990          .TXE           .ELC           .TX            .ANNUAL                                      0.82700000
+REG            .2000          .TXE           .ELC           .TX            .ANNUAL                                      0.82700000
+REG            .2010          .TXE           .ELC           .TX            .ANNUAL                                      0.82700000
+/;
+
+PARAMETER NCAP_BND
+/
+REG            .1990          .TXE           .UP                                                                        EPS
+/;
+
+PARAMETER NCAP_AF(REG,ALLYEAR,PRC,TS,BD)
+/
+REG            .1990          .TXE           .ANNUAL        .UP                                                         1.00000000
+REG            .2000          .TXE           .ANNUAL        .UP                                                         1.00000000
+REG            .2010          .TXE           .ANNUAL        .UP                                                         1.00000000
+/;
+
+PARAMETER CAP_BND(REG,ALLYEAR,PRC,BD)
+/
+REG            .2000          .TXE           .UP                                                                        4.00000000
+REG            .2010          .TXE           .UP                                                                        1.00000E+1
+/;
+
+PARAMETER NCAP_FOM(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .TXE           .CUR                                                                       1.00000E+2
+REG            .2000          .TXE           .CUR                                                                       9.00000E+1
+REG            .2010          .TXE           .CUR                                                                       8.00000E+1
+/;
+
+PARAMETER NCAP_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .TXE           .CUR                                                                       2.00000E+3
+REG            .2000          .TXE           .CUR                                                                       1.75000E+3
+REG            .2010          .TXE           .CUR                                                                       1.50000E+3
+/;
+
+PARAMETER NCAP_TLIFE(REG,ALLYEAR,PRC)
+/
+REG            .1990          .TXE                                                                                      1.50000E+1
+REG            .2000          .TXE                                                                                      1.50000E+1
+REG            .2010          .TXE                                                                                      1.50000E+1
+/;
+
+SET PRC
+/
+TXG       'Gasoline Car                            '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .TXG           .GSL           .IN
+REG            .TXG           .TX            .OUT
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .TXG           .TX            .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .TXG           .GSL
+REG            .TXG           .TX
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .TXG           .ANNUAL
+/;
+
+SET PRC_MAP(REG,PRC_GRP,PRC)
+/
+REG            .DMD           .TXG
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .TXG                                                                 1.00000000
+/;
+
+PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+/
+REG            .1990          .TXG           .GSL           .TX            .ANNUAL                                      0.23100000
+REG            .2000          .TXG           .GSL           .TX            .ANNUAL                                      0.23100000
+REG            .2010          .TXG           .GSL           .TX            .ANNUAL                                      0.23100000
+/;
+
+PARAMETER NCAP_AF(REG,ALLYEAR,PRC,TS,BD)
+/
+REG            .1990          .TXG           .ANNUAL        .UP                                                         1.00000000
+REG            .2000          .TXG           .ANNUAL        .UP                                                         1.00000000
+REG            .2010          .TXG           .ANNUAL        .UP                                                         1.00000000
+/;
+
+PARAMETER NCAP_FOM(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .TXG           .CUR                                                                       4.80000E+1
+REG            .2000          .TXG           .CUR                                                                       4.80000E+1
+REG            .2010          .TXG           .CUR                                                                       4.80000E+1
+/;
+
+PARAMETER NCAP_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .TXG           .CUR                                                                       1.04400E+3
+REG            .2000          .TXG           .CUR                                                                       1.04400E+3
+REG            .2010          .TXG           .CUR                                                                       1.04400E+3
+/;
+
+PARAMETER NCAP_TLIFE(REG,ALLYEAR,PRC)
+/
+REG            .1981          .TXG                                                                                      1.50000E+1
+REG            .1985          .TXG                                                                                      2.10000E+1
+REG            .1990          .TXG                                                                                      1.50000E+1
+REG            .2000          .TXG                                                                                      1.50000E+1
+REG            .2010          .TXG                                                                                      1.50000E+1
+/;
+
+PARAMETER NCAP_PASTI(REG,ALLYEAR,PRC)
+/
+REG            .1981          .TXG                                                                                      3.10000000
+REG            .1985          .TXG                                                                                      1.50000000
+/;
+
+SET PRC
+/
+IMPDSL1   'Import of Diesel                        '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .IMPDSL1       .CO2           .OUT
+/;
+
+SET TOP_IRE(ALL_REG,COM,ALL_REG,COM,PRC)
+/
+IMPEXP         .DSL           .REG           .DSL           .IMPDSL1
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .IMPDSL1       .DSL           .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .IMPDSL1       .DSL
+REG            .IMPDSL1       .CO2
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .IMPDSL1       .ANNUAL
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .IMPDSL1                                                             1.00000000
+/;
+
+PARAMETER IRE_PRICE(REG,ALLYEAR,PRC,COM,TS,ALL_REG,IE,CUR)
+/
+REG            .1990          .IMPDSL1       .DSL           .ANNUAL        .IMPEXP        .IMP           .CUR           1.00000E+1
+REG            .2000          .IMPDSL1       .DSL           .ANNUAL        .IMPEXP        .IMP           .CUR           1.00000E+1
+REG            .2010          .IMPDSL1       .DSL           .ANNUAL        .IMPEXP        .IMP           .CUR           1.00000E+1
+/;
+
+*PARAMETER IRE_FLOSUM(REG,ALLYEAR,PRC,COM,TS,IE,COM,IO)
+*/
+*REG            .1990          .IMPDSL1       .DSL           .ANNUAL        .IMP           .CO2           .OUT           75.000000
+*REG            .2000          .IMPDSL1       .DSL           .ANNUAL        .IMP           .CO2           .OUT           75.000000
+*REG            .2010          .IMPDSL1       .DSL           .ANNUAL        .IMP           .CO2           .OUT           75.000000
+*/;
+
+SET PRC
+/
+IMPGSL1   'Import of Gasoline                      '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .IMPGSL1       .CO2           .OUT
+/;
+
+SET TOP_IRE(ALL_REG,COM,ALL_REG,COM,PRC)
+/
+IMPEXP         .GSL           .REG           .GSL           .IMPGSL1
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .IMPGSL1       .GSL           .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .IMPGSL1       .GSL
+REG            .IMPGSL1       .CO2
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .IMPGSL1       .ANNUAL
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .IMPGSL1                                                             1.00000000
+/;
+
+PARAMETER IRE_PRICE(REG,ALLYEAR,PRC,COM,TS,ALL_REG,IE,CUR)
+/
+REG            .1990          .IMPGSL1       .GSL           .ANNUAL        .IMPEXP        .IMP           .CUR           1.50000E+1
+REG            .2000          .IMPGSL1       .GSL           .ANNUAL        .IMPEXP        .IMP           .CUR           1.50000E+1
+REG            .2010          .IMPGSL1       .GSL           .ANNUAL        .IMPEXP        .IMP           .CUR           1.50000E+1
+/;
+
+*PARAMETER IRE_FLOSUM(REG,ALLYEAR,PRC,COM,TS,IE,COM,IO)
+*/
+*REG            .1990          .IMPGSL1       .GSL           .ANNUAL        .IMP           .CO2           .OUT           75.000000
+*REG            .2000          .IMPGSL1       .GSL           .ANNUAL        .IMP           .CO2           .OUT           75.000000
+*REG            .2010          .IMPGSL1       .GSL           .ANNUAL        .IMP           .CO2           .OUT           75.000000
+*/;
+
+SET PRC
+/
+IMPHCO1   'Import of Hard Coal                     '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .IMPHCO1       .CO2           .OUT
+/;
+
+SET TOP_IRE(ALL_REG,COM,ALL_REG,COM,PRC)
+/
+IMPEXP         .HCO           .REG           .HCO           .IMPHCO1
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .IMPHCO1       .HCO           .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .IMPHCO1       .HCO
+REG            .IMPHCO1       .CO2
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .IMPHCO1       .ANNUAL
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .IMPHCO1                                                             1.00000000
+/;
+
+PARAMETER IRE_PRICE(REG,ALLYEAR,PRC,COM,TS,ALL_REG,IE,CUR)
+/
+REG            .1990          .IMPHCO1       .HCO           .ANNUAL        .IMPEXP        .IMP           .CUR           2.00000000
+REG            .2000          .IMPHCO1       .HCO           .ANNUAL        .IMPEXP        .IMP           .CUR           2.00000000
+REG            .2010          .IMPHCO1       .HCO           .ANNUAL        .IMPEXP        .IMP           .CUR           2.00000000
+/;
+
+*PARAMETER IRE_FLOSUM(REG,ALLYEAR,PRC,COM,TS,IE,COM,IO)
+*/
+*REG            .1990          .IMPHCO1       .HCO           .ANNUAL        .IMP           .CO2           .OUT           89.000000
+*REG            .2000          .IMPHCO1       .HCO           .ANNUAL        .IMP           .CO2           .OUT           89.000000
+*REG            .2010          .IMPHCO1       .HCO           .ANNUAL        .IMP           .CO2           .OUT           89.000000
+*/;
+
+SET PRC
+/
+IMPOIL1   'Import of Crude                         '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .IMPOIL1       .CO2           .OUT
+/;
+
+SET TOP_IRE(ALL_REG,COM,ALL_REG,COM,PRC)
+/
+IMPEXP         .OIL           .REG           .OIL           .IMPOIL1
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .IMPOIL1       .OIL           .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .IMPOIL1       .OIL
+REG            .IMPOIL1       .CO2
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .IMPOIL1       .ANNUAL
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .IMPOIL1                                                             1.00000000
+/;
+
+PARAMETER IRE_PRICE(REG,ALLYEAR,PRC,COM,TS,ALL_REG,IE,CUR)
+/
+REG            .1990          .IMPOIL1       .OIL           .ANNUAL        .IMPEXP        .IMP           .CUR           8.00000000
+REG            .2000          .IMPOIL1       .OIL           .ANNUAL        .IMPEXP        .IMP           .CUR           8.00000000
+REG            .2010          .IMPOIL1       .OIL           .ANNUAL        .IMPEXP        .IMP           .CUR           8.00000000
+/;
+
+*PARAMETER IRE_FLOSUM(REG,ALLYEAR,PRC,COM,TS,IE,COM,IO)
+*/
+*REG            .1990          .IMPOIL1       .OIL           .ANNUAL        .IMP           .CO2           .OUT           75.000000
+*REG            .2000          .IMPOIL1       .OIL           .ANNUAL        .IMP           .CO2           .OUT           75.000000
+*REG            .2010          .IMPOIL1       .OIL           .ANNUAL        .IMP           .CO2           .OUT           75.000000
+*/;
+
+SET PRC
+/
+IMPURN1   'Import of Uranium                       '
+/;
+
+SET TOP_IRE(ALL_REG,COM,ALL_REG,COM,PRC)
+/
+IMPEXP         .URN           .REG           .URN           .IMPURN1
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .IMPURN1       .URN           .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .IMPURN1       .URN
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .IMPURN1       .ANNUAL
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .IMPURN1                                                             1.00000000
+/;
+
+PARAMETER IRE_PRICE(REG,ALLYEAR,PRC,COM,TS,ALL_REG,IE,CUR)
+/
+REG            .1990          .IMPURN1       .URN           .ANNUAL        .IMPEXP        .IMP           .CUR           2.00000000
+REG            .2000          .IMPURN1       .URN           .ANNUAL        .IMPEXP        .IMP           .CUR           2.00000000
+REG            .2010          .IMPURN1       .URN           .ANNUAL        .IMPEXP        .IMP           .CUR           2.00000000
+/;
+
+* ------------------------------------------------------
+* Addition of new commodity: GAS
+* ------------------------------------------------------
+
+SET COM_GRP
+/
+GAS
+/;
+
+SET COM(COM_GRP)
+/
+GAS
+/;
+
+SET COM_TSL(REG,COM,TSLVL)
+/
+REG       .GAS      .ANNUAL
+/;
+
+SET COM_TMAP(REG,COM_TYPE,COM)
+/
+REG       .NRG      .GAS
+/;
+
+SET NRG_TMAP(REG,NRG_TYPE,COM)
+/
+REG       .FOSSIL   .GAS
+/;
+
+SET COM_UNIT(REG,COM,UNITS_COM)
+/
+REG       .GAS      .PJ
+/;
+
+* ------------------------------------------------------
+* Addition of import process IMPGAS1
+* ------------------------------------------------------
+
+SET PRC
+/
+IMPGAS1   'Import of Uranium                       '
+/;
+
+SET TOP_IRE(ALL_REG,COM,ALL_REG,COM,PRC)
+/
+IMPEXP         .GAS           .REG           .GAS           .IMPGAS1
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .IMPGAS1       .GAS           .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .IMPGAS1       .GAS
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .IMPGAS1       .ANNUAL
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .IMPGAS1                                                             1.00000000
+/;
+
+PARAMETER IRE_PRICE(REG,ALLYEAR,PRC,COM,TS,ALL_REG,IE,CUR)
+/
+REG            .1990          .IMPGAS1       .GAS           .ANNUAL        .IMPEXP        .IMP           .CUR           6.40000000
+REG            .2000          .IMPGAS1       .GAS           .ANNUAL        .IMPEXP        .IMP           .CUR           6.40000000
+REG            .2010          .IMPGAS1       .GAS           .ANNUAL        .IMPEXP        .IMP           .CUR           6.40000000
+/;
+
+* ------------------------------------------------------
+* Addition of residential gas/oil boiler RHG
+* ------------------------------------------------------
+
+SET PRC
+/
+RHG       'Gas/oil Boiler                           '
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .RHG           .GAS           .IN
+REG            .RHG           .RH            .OUT
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .RHG           .RH            .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .RHG           .GAS
+REG            .RHG           .RH
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .RHG           .ANNUAL
+/;
+
+SET PRC_MAP(REG,PRC_GRP,PRC)
+/
+REG            .DMD           .RHG
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .RHG                                                                 1.00000000
+/;
+
+*PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+*/
+*REG            .1990          .RHG           .GAS           .RH            .ANNUAL                                      0.70000000
+*REG            .2000          .RHG           .GAS           .RH            .ANNUAL                                      0.70000000
+*REG            .2010          .RHG           .GAS           .RH            .ANNUAL                                      0.70000000
+*/;
+
+PARAMETER NCAP_AF(REG,ALLYEAR,PRC,TS,BD)
+/
+REG            .1990          .RHG           .ANNUAL        .UP                                                         1.00000000
+REG            .2000          .RHG           .ANNUAL        .UP                                                         1.00000000
+REG            .2010          .RHG           .ANNUAL        .UP                                                         1.00000000
+/;
+
+PARAMETER NCAP_FOM(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .RHG           .CUR                                                                       0.10000000
+REG            .2000          .RHG           .CUR                                                                       0.10000000
+REG            .2010          .RHG           .CUR                                                                       0.10000000
+/;
+
+PARAMETER NCAP_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .RHG           .CUR                                                                       1.500000E+1
+REG            .2000          .RHG           .CUR                                                                       1.500000E+1
+REG            .2010          .RHG           .CUR                                                                       1.500000E+1
+/;
+
+PARAMETER NCAP_TLIFE(REG,ALLYEAR,PRC)
+/
+REG            .1966          .RHG                                                                                      3.00000E+1
+REG            .1976          .RHG                                                                                      3.00000E+1
+REG            .1990          .RHG                                                                                      3.00000E+1
+REG            .2000          .RHG                                                                                      3.00000E+1
+REG            .2010          .RHG                                                                                      3.00000E+1
+/;
+
+PARAMETER NCAP_PASTI(REG,ALLYEAR,PRC)
+/
+REG            .1966          .RHG                                                                                      4.0000E+1
+REG            .1976          .RHG                                                                                      4.0000E+1
+/;
+
+* ------------------------------------------------------
+* Addition of Diesel as input fuel for RHG
+* ------------------------------------------------------
+
+SET COM_GRP
+/
+RHG_IN
+/;
+
+SET COM_GMAP(REG,COM_GRP,COM)
+/
+REG       .RHG_IN       .DSL
+REG       .RHG_IN       .GAS
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .RHG           .DSL           .IN
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .RHG           .DSL
+REG            .RHG           .RHG_IN
+/;
+
+PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+/
+REG            .1990          .RHG           .RHG_IN           .RH            .ANNUAL                                      0.70000000
+REG            .2000          .RHG           .RHG_IN           .RH            .ANNUAL                                      0.70000000
+REG            .2010          .RHG           .RHG_IN           .RH            .ANNUAL                                      0.70000000
+/;
+
+PARAMETER FLO_SHAR(REG,ALLYEAR,PRC,COM,COM_GRP,TS,BD)
+/
+REG            .1990          .RHG           .DSL           .RHG_IN           .ANNUAL        .FX                           0.10000000
+REG            .2000          .RHG           .DSL           .RHG_IN           .ANNUAL        .FX                           0.10000000
+REG            .2010          .RHG           .DSL           .RHG_IN           .ANNUAL        .FX                           0.10000000
+/;
+
+* ------------------------------------------------------------------------
+* Adding CO2 emissions directly to each process; removed IRE_FLOSUM above
+* ------------------------------------------------------------------------
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .E01           .CO2           .OUT
+REG            .E70           .CO2           .OUT
+REG            .RHO           .CO2           .OUT
+REG            .TXD           .CO2           .OUT
+REG            .TXG           .CO2           .OUT
+REG            .RHG           .CO2           .OUT
+/;
+
+SET  PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .E01           .CO2
+REG            .E70           .CO2
+REG            .RHO           .CO2
+REG            .TXD           .CO2
+REG            .TXG           .CO2
+REG            .RHG           .CO2
+/;
+
+
+PARAMETER FLO_SUM(REG,ALLYEAR,PRC,COM_GRP,COM,COM_GRP,TS)
+/
+REG            .1990          .E01           .HCO           .HCO              .CO2           .ANNUAL       89
+REG            .2000          .E01           .HCO           .HCO              .CO2           .ANNUAL       89
+REG            .2010          .E01           .HCO           .HCO              .CO2           .ANNUAL       89
+REG            .1990          .E70           .DSL           .DSL              .CO2           .ANNUAL       75
+REG            .2000          .E70           .DSL           .DSL              .CO2           .ANNUAL       75
+REG            .2010          .E70           .DSL           .DSL              .CO2           .ANNUAL       75
+REG            .1990          .RHO           .DSL           .DSL              .CO2           .ANNUAL       75
+REG            .2000          .RHO           .DSL           .DSL              .CO2           .ANNUAL       75
+REG            .2010          .RHO           .DSL           .DSL              .CO2           .ANNUAL       75
+REG            .1990          .TXD           .DSL           .DSL              .CO2           .ANNUAL       75
+REG            .2000          .TXD           .DSL           .DSL              .CO2           .ANNUAL       75
+REG            .2010          .TXD           .DSL           .DSL              .CO2           .ANNUAL       75
+REG            .1990          .TXG           .GSL           .GSL              .CO2           .ANNUAL       75
+REG            .2000          .TXG           .GSL           .GSL              .CO2           .ANNUAL       75
+REG            .2010          .TXG           .GSL           .GSL              .CO2           .ANNUAL       75
+REG            .1990          .RHG           .RHG_IN        .DSL              .CO2           .ANNUAL       75
+REG            .2000          .RHG           .RHG_IN        .DSL              .CO2           .ANNUAL       75
+REG            .2010          .RHG           .RHG_IN        .DSL              .CO2           .ANNUAL       75
+REG            .1990          .RHG           .RHG_IN        .GAS              .CO2           .ANNUAL       56
+REG            .2000          .RHG           .RHG_IN        .GAS              .CO2           .ANNUAL       56
+REG            .2010          .RHG           .RHG_IN        .GAS              .CO2           .ANNUAL       56
+/;
+
+* ------------------------------------------------------------------------
+* Natural gas combined-cycle power plant
+* ------------------------------------------------------------------------
+
+SET PRC
+/
+E41       'Natural gas combined-cycle plant'
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .E41           .GAS           .IN
+REG            .E41           .ELC           .OUT
+REG            .E41           .CO2           .OUT
+/;
+
+SET PRC_ACTUNT(REG,PRC,COM_GRP,UNITS_ACT)
+/
+REG            .E41           .ELC            .PJ
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .E41           .GAS
+REG            .E41           .ELC
+REG            .E41           .CO2
+/;
+
+SET PRC_TSL(REG,PRC,TSLVL)
+/
+REG            .E41           .DAYNITE
+/;
+
+SET PRC_MAP(REG,PRC_GRP,PRC)
+/
+REG            .ELE           .E41
+/;
+
+PARAMETER PRC_CAPACT(REG,PRC)
+/
+REG       .E41                                                                 3.15400E+1
+/;
+
+SET PRC_VINT(REG,PRC)
+/
+REG       .E41
+/;
+
+*PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+*/
+*REG            .1990          .E41           .GAS           .ELC            .ANNUAL                                      0.575
+*REG            .2000          .E41           .GAS           .ELC            .ANNUAL                                      0.575
+*REG            .2010          .E41           .GAS           .ELC            .ANNUAL                                      0.600
+*/;
+
+PARAMETER FLO_SUM(REG,ALLYEAR,PRC,COM_GRP,COM,COM_GRP,TS)
+/
+REG            .1990          .E41           .GAS           .GAS            .CO2           .ANNUAL       56
+REG            .2000          .E41           .GAS           .GAS            .CO2           .ANNUAL       56
+REG            .2010          .E41           .GAS           .GAS            .CO2           .ANNUAL       56
+/;
+
+PARAMETER NCAP_AF(REG,ALLYEAR,PRC,TS,BD)
+/
+REG            .1990          .E41           .ANNUAL        .UP                                                         0.8
+REG            .2000          .E41           .ANNUAL        .UP                                                         0.8
+REG            .2010          .E41           .ANNUAL        .UP                                                         0.8
+/;
+
+* 1.5 cent/kWh
+PARAMETER ACT_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E41           .CUR																		0.4
+REG            .2000          .E41           .CUR																		0.4
+REG            .2010          .E41           .CUR																		0.4
+/;
+
+PARAMETER NCAP_FOM(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E41           .CUR																		22
+REG            .2000          .E41           .CUR																		22
+REG            .2010          .E41           .CUR																		20
+/;
+
+PARAMETER NCAP_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E41           .CUR                                                                       450
+REG            .2000          .E41           .CUR                                                                       450
+REG            .2010          .E41           .CUR                                                                       425
+/;
+
+PARAMETER NCAP_TLIFE(REG,ALLYEAR,PRC)
+/
+REG            .1990          .E41                                                                                      3.50000E+1
+REG            .2000          .E41                                                                                      3.50000E+1
+REG            .2010          .E41                                                                                      3.50000E+1
+/;
+
+PARAMETER NCAP_BND
+/
+REG            .1990          .E41           .UP                                                                        EPS
+/;
+
+* ------------------------------------------------------------------------
+* Changing Natural gas combined-cycle power plant E41 to backpressure CHP plant
+* ------------------------------------------------------------------------
+
+SET COM_GRP
+/
+E41_OUT
+/;
+
+SET COM_GMAP(REG,COM_GRP,COM)
+/
+REG       .E41_OUT       .ELC
+REG       .E41_OUT       .RH
+/;
+
+SET TOP(REG,PRC,COM,IO)
+/
+REG            .E41           .RH           .OUT
+/;
+
+SET PRC_CG(REG,PRC,COM_GRP)
+/
+REG            .E41           .RH
+REG            .E41           .E41_OUT
+/;
+
+*PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+*/
+*REG            .1990          .E41           .GAS           .E41_OUT            .ANNUAL                   0.9
+*REG            .2000          .E41           .GAS           .E41_OUT            .ANNUAL                   0.9
+*REG            .2010          .E41           .GAS           .E41_OUT            .ANNUAL                   0.9
+*/;
+*
+*PARAMETER FLO_SHAR(REG,ALLYEAR,PRC,COM,COM_GRP,TS,BD)
+*/
+*REG            .1990          .E41           .ELC           .E41_OUT            .ANNUAL        .FX           0.50
+*REG            .2000          .E41           .ELC           .E41_OUT            .ANNUAL        .FX           0.50
+*REG            .2010          .E41           .ELC           .E41_OUT            .ANNUAL        .FX           0.51
+*/;
+
+PARAMETER NCAP_FOM(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E41           .CUR																		31
+REG            .2000          .E41           .CUR																		31
+REG            .2010          .E41           .CUR																		29
+/;
+
+PARAMETER NCAP_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E41           .CUR                                                                       625
+REG            .2000          .E41           .CUR                                                                       625
+REG            .2010          .E41           .CUR                                                                       585
+/;
+
+* ------------------------------------------------------------------------
+* Changing BP CHP power plant E41 to extraction condensing CHP plant
+* ------------------------------------------------------------------------
+
+* condensing mode efficiency 0.54 - 0.56
+PARAMETER FLO_FUNC(REG,ALLYEAR,PRC,COM_GRP,COM_GRP,TS)
+/
+REG            .1956          .E41           .E41_OUT            .GAS           .ANNUAL                   2
+REG            .1990          .E41           .E41_OUT            .GAS           .ANNUAL                   1.851
+REG            .2000          .E41           .E41_OUT            .GAS           .ANNUAL                   1.851
+REG            .2010          .E41           .E41_OUT            .GAS           .ANNUAL                   1.786
+/;
+
+* Backpressure point: Electrical efficiency: 0.45 Thermal efficiency: 0.44 (CEH in MARKAL)
+PARAMETER FLO_SUM(REG,ALLYEAR,PRC,COM_GRP,COM,COM_GRP,TS)
+/
+REG            .1990          .E41           .E41_OUT           .RH            .GAS           .ANNUAL	  0.2045
+REG            .2000          .E41           .E41_OUT           .RH            .GAS           .ANNUAL     0.2045
+REG            .2010          .E41           .E41_OUT           .RH            .GAS           .ANNUAL	  0.2500
+/;
+
+PARAMETER FLO_SHAR(REG,ALLYEAR,PRC,COM,COM_GRP,TS,BD)
+/
+REG            .1990          .E41           .ELC           .E41_OUT            .ANNUAL        .LO           0.5056
+REG            .2000          .E41           .ELC           .E41_OUT            .ANNUAL        .LO           0.5056
+REG            .2010          .E41           .ELC           .E41_OUT            .ANNUAL        .LO           0.5056
+/;
+
+PARAMETER NCAP_FOM(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E41           .CUR																		35
+REG            .2000          .E41           .CUR																		35
+REG            .2010          .E41           .CUR																		33
+/;
+
+PARAMETER NCAP_COST(REG,ALLYEAR,PRC,CUR)
+/
+REG            .1990          .E41           .CUR                                                                       690
+REG            .2000          .E41           .CUR                                                                       690
+REG            .2010          .E41           .CUR                                                                       660
+/;
+
+* --------------------------------------------------------------
+* Adding timelslice resolution
+* --------------------------------------------------------------
+
+* changed COM_TSL above
+
+* changed PRC_TSL above
+
+PARAMETER COM_FR(REG,ALLYEAR,COM,TS)
+/
+REG       .1990     .RH       .SPD           0.06
+REG       .1990     .RH       .SPN           0.04
+REG       .1990     .RH       .SUD           EPS
+REG       .1990     .RH       .SUN           EPS
+REG       .1990     .RH       .FAD				0.18
+REG       .1990     .RH       .FAN           0.12
+REG       .1990     .RH       .WID				0.40
+REG       .1990     .RH       .WIN           0.20
+REG       .1990     .RL       .SPD           0.12
+REG       .1990     .RL       .SPN           0.08
+REG       .1990     .RL       .SUD           0.10
+REG       .1990     .RL       .SUN           0.03
+REG       .1990     .RL       .FAD				0.20
+REG       .1990     .RL       .FAN           0.05
+REG       .1990     .RL       .WID				0.30
+REG       .1990     .RL       .WIN           0.12
+REG       .2000     .RH       .SPD           0.06
+REG       .2000     .RH       .SPN           0.04
+REG       .2000     .RH       .SUD           EPS
+REG       .2000     .RH       .SUN           EPS
+REG       .2000     .RH       .FAD				0.18
+REG       .2000     .RH       .FAN           0.12
+REG       .2000     .RH       .WID				0.40
+REG       .2000     .RH       .WIN           0.20
+REG       .2000     .RL       .SPD           0.12
+REG       .2000     .RL       .SPN           0.08
+REG       .2000     .RL       .SUD           0.10
+REG       .2000     .RL       .SUN           0.03
+REG       .2000     .RL       .FAD				0.20
+REG       .2000     .RL       .FAN           0.05
+REG       .2000     .RL       .WID				0.30
+REG       .2000     .RL       .WIN           0.12
+REG       .2010     .RH       .SPD           0.06
+REG       .2010     .RH       .SPN           0.04
+REG       .2010     .RH       .SUD           EPS
+REG       .2010     .RH       .SUN           EPS
+REG       .2010     .RH       .FAD				0.18
+REG       .2010     .RH       .FAN           0.12
+REG       .2010     .RH       .WID				0.40
+REG       .2010     .RH       .WIN           0.20
+REG       .2010     .RL       .SPD           0.12
+REG       .2010     .RL       .SPN           0.08
+REG       .2010     .RL       .SUD           0.10
+REG       .2010     .RL       .SUN           0.03
+REG       .2010     .RL       .FAD				0.20
+REG       .2010     .RL       .FAN           0.05
+REG       .2010     .RL       .WID				0.30
+REG       .2010     .RL       .WIN           0.12
+/;
+
+
+SET COM_PEAK(REG,COM_GRP)
+/
+REG       .ELC
+/;
+
+PARAMETER COM_PKRSV(REG,ALLYEAR,COM)
+/
+REG       .1990     .ELC                                                       0.85000000
+REG       .2000     .ELC                                                       0.85000000
+REG       .2010     .ELC                                                       0.85000000
+/;
+
+PARAMETER COM_PKFLX(REG,ALLYEAR,COM,TS)
+/
+REG       .1990     .ELC  .WID                                                     0.2
+REG       .2000     .ELC  .WID                                                     0.2
+REG       .2010     .ELC  .WID                                                     0.2
+REG       .1990     .ELC  .FAD                                                     0.2
+REG       .2000     .ELC  .FAD                                                     0.2
+REG       .2010     .ELC  .FAD                                                     0.2
+REG       .1990     .ELC  .SUD                                                     0.2
+REG       .2000     .ELC  .SUD                                                     0.2
+REG       .2010     .ELC  .SUD                                                     0.2
+REG       .1990     .ELC  .SPD                                                     0.2
+REG       .2000     .ELC  .SPD                                                     0.2
+REG       .2010     .ELC  .SPD                                                     0.2
+/;
+
+PARAMETER NCAP_AFA(REG,ALLYEAR,PRC,BD)
+/
+REG            .1990          .E01                   .UP                                                         0.80000000
+REG            .2000          .E01                   .UP                                                         0.80000000
+REG            .2010          .E01                   .UP                                                         0.80000000
+/;
+
+PARAMETER NCAP_AFA(REG,ALLYEAR,PRC,BD)
+/
+REG            .1990          .E70                   .UP                                                         0.80000000
+REG            .2000          .E70                   .UP                                                         0.80000000
+REG            .2010          .E70                   .UP                                                         0.80000000
+/;
+
+PARAMETER NCAP_AF(REG,ALLYEAR,PRC,TS,BD)
+/
+REG            .1990          .E31           .WI        .UP                                                         0.70000000
+REG            .2000          .E31           .SU        .UP                                                         0.40000000
+REG            .2010          .E31           .SP        .UP                                                         0.70000000
+REG            .2010          .E31           .FA        .UP                                                         0.40000000
+/;
+
+*	1 PJ of storage capacity correspnds to
+*			Duration  Capacity [GW]
+*   SPD	0.167	    0.190
+*   SPN	0.083	    0.382
+*   SUD	0.18	    0.176
+*   SUN	0.07	    0.453
+*   FAD	0.167	    0.190
+*   FAN	0.083	    0.382
+*   WID	0.11	    0.288
+*   WIN	0.14	    0.227
+
+PARAMETER NCAP_PKCNT(REG,ALLYEAR,PRC,ALL_TS)
+/
+REG            .1990          .E51           .SPD    0.190
+REG            .1990          .E51           .SPN    0.382
+REG            .1990          .E51           .SUD    0.176
+REG            .1990          .E51           .SUN    0.453
+REG            .1990          .E51           .FAD    0.190
+REG            .1990          .E51           .FAN    0.382
+REG            .1990          .E51           .WID    0.288
+REG            .1990          .E51           .WIN    0.227
+/;
+
+
