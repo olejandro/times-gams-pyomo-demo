@@ -1,2 +1,6 @@
 *.lst
 *.gdx
+END_GAMS
+*.db3
+*.log
+*.vd*
