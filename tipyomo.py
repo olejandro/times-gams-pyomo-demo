@@ -116,68 +116,87 @@ model.COEF_OBFIX = Param(model.REGION, model.MODLYR, model.PROCESS, model.CURENC
 def MILE(model,y):
     if y in model.MILEYR:
         return 1
-model.MILE = Param(model.MODLYR, within=Binary, default=0, initialize=MILE)
+    else:
+        return 0
 
-model.RP_AIRE = Param(model.RP_IRE, model.IMPEXP, within=Binary, default=0)
+model.MILE = Param(model.MODLYR, initialize=MILE, default=0, within=Binary)
+
+model.RP_AIRE = Param(model.RP_IRE, model.IMPEXP, default=0, within=Binary)
 
 def ISRP(model,r,p):
     if (r,p) in model.RP:
         return 1
-model.ISRP = Param(model.REGION, model.PROCESS, within=Binary, default=0, initialize=ISRP)
+    else:
+        return 0
 
-model.RP_ISIRE = Param(model.REGION, model.PROCESS, within=Binary, default=0)
-model.RTP_IPRI = Param(model.REGION, model.PROCESS, model.MILEYR, model.CURENCY, within=Binary, default=0)
+model.ISRP = Param(model.REGION, model.PROCESS, initialize=ISRP, default=0, within=Binary)
+
+model.RP_ISIRE = Param(model.REGION, model.PROCESS, default=0, within=Binary)
+model.RTP_IPRI = Param(model.REGION, model.PROCESS, model.MILEYR, model.CURENCY, default=0, within=Binary)
 
 def LINTY(model,r,t,cur):
     return (y for y in model.MODLYR if (r,t,y,cur) in model.IS_LINT)
+
 model.LINTY = Set(model.REGION, model.MILEYR, model.CURENCY, initialize=LINTY)
 
 def RTP_VNT(model,r,t,p):
     return (y for y in model.MODLYR if (r,y,t,p) in model.RTP_VINTYR)
+
 model.RTP_VNT = Set(model.RTP, initialize=RTP_VNT)
 
 def RTP_CPT(model,r,t,p):
     return (y for y in model.MODLYR if (r,y,t,p) in model.RTP_CPTYR)
+
 model.RTP_CPT = Set(model.RTP, initialize=RTP_CPT)
 
 def RTP_AFS(model,r,t,p,l):
     return (s for s in model.TSLICE if (r,t,p,s,l) in model.AFS)
+
 model.RTP_AFS = Set(model.RTP, model.LIM, initialize=RTP_AFS)
 
 def RP_TS(model,r,p):
     return (s for s in model.TSLICE if (r,p,s) in model.PRC_TS)
+
 model.RP_TS = Set(model.RP, initialize=RP_TS)
 
 def RP_S1(model,r,p):
     return (s for s in model.TSLICE if (r,p,s) in model.RPS_S1)
+
 model.RP_S1 = Set(model.RP, initialize=RP_S1)
 
 def RP_PGC(model,r,p):
     return (c for c in model.COMMTY if (r,p,c) in model.RPC_PG)
+
 model.RP_PGC = Set(model.RP, initialize=RP_PGC)
 
 def RP_CIE(model,r,p):
     return ((c,ie) for (c,ie) in model.COMMTY*model.IMPEXP if (r,p,c,ie) in model.RPC_IRE)
+
 model.RP_CIE = Set(model.RP_IRE, dimen=2, initialize=RP_CIE)
 
 def RPC_TS(model,r,p,c):
     return (s for s in model.TSLICE if (r,p,c,s) in model.RPCS_VAR)
+
 model.RPC_TS = Set(model.RPC, initialize=RPC_TS)
 
 def RPIO_C(model,r,p,io):
     return (c for c in model.COMMTY if (r,p,c,io) in model.TOP)
+
 model.RPIO_C = Set(model.RP, model.INOUT, initialize=RPIO_C)
 
 def RCIO_P(model,r,c,io):
     return (p for p in model.PROCESS if (r,p,c,io) in model.TOP)
+
 model.RCIO_P = Set(model.RC, model.INOUT, initialize=RCIO_P)
 
 def RCIE_P(model,r,c,ie):
     return (p for p in model.PROCESS if (r,p,c,ie) in model.RPC_IRE)
+
 model.RCIE_P = Set(model.RC, model.IMPEXP, initialize=RCIE_P)
 
 def RP_ACE(model,r,p):
     return (c for c in model.COMMTY if (r,p,c) in model.RPC_ACE)
+
 model.RP_ACE = Set(model.RP, initialize=RP_ACE)
 
 # ============================================================================
@@ -209,8 +228,8 @@ def PrcNcap_bounds(model,r,y,p):
     else: 
         ub=float('inf')
     return (lb, ub)
-model.PrcNcap = Var(model.REGION, model.MODLYR, model.PROCESS, bounds=PrcNcap_bounds, dense=False)
 
+model.PrcNcap = Var(model.REGION, model.MODLYR, model.PROCESS, bounds=PrcNcap_bounds, dense=False)
 model.PrcAct  = Var(model.REGION, model.YEAR, model.MILEYR, model.PROCESS, model.TSLICE, within=NonNegativeReals, dense=False)
 model.PrcFlo  = Var(model.REGION, model.YEAR, model.MILEYR, model.PROCESS, model.COMMTY, model.TSLICE, within=NonNegativeReals, dense=False)
 model.IreFlo  = Var(model.REGION, model.YEAR, model.MILEYR, model.PROCESS, model.COMMTY, model.TSLICE, model.IMPEXP, within=NonNegativeReals, dense=False)
@@ -221,18 +240,21 @@ model.StgFlo  = Var(model.REGION, model.YEAR, model.MILEYR, model.PROCESS, model
 
 def obj_rule(model):
 	return sum(model.RegObj[o,r,cur] for o in model.OBV for (r,cur) in model.RDCUR)
+
 model.obj = Objective(rule=obj_rule, sense=minimize)
 
 def EQ_OBJINV(model,r,cur):
     return (sum(model.OBJ_PVT[r,t,cur] * model.COEF_CPT[r,v,t,p] * model.COEF_OBINV[r,v,p,cur] *
                 ((model.PrcNcap[r,v,p] if v in model.MILEYR else 0) + model.NCAP_PASTI[r,v,p]) for (r,v,t,p)
                 in model.RTP_CPTYR if model.COEF_OBINV[r,v,p,cur]) == model.RegObj['OBJINV',r,cur])
+
 model.EQ_OBJINV = Constraint(model.RDCUR, rule=EQ_OBJINV)
 
 def EQ_OBJFIX(model,r,cur):
     return (sum(model.OBJ_PVT[r,t,cur] * model.COEF_CPT[r,v,t,p] * model.COEF_OBFIX[r,v,p,cur] *
                 ((model.PrcNcap[r,v,p] if v in model.MILEYR else 0) + model.NCAP_PASTI[r,v,p]) for (r,v,t,p) 
                 in model.RTP_CPTYR if model.COEF_OBFIX[r,v,p,cur]) == model.RegObj['OBJFIX',r,cur])
+
 model.EQ_OBJFIX = Constraint(model.RDCUR, rule=EQ_OBJFIX)
 
 def EQ_OBJVAR(model,r,cur):
@@ -243,10 +265,13 @@ def EQ_OBJVAR(model,r,cur):
                             sum(model.IreFlo[r,v,t,p,c,s,ie] for v in model.RTP_VNT[r,t,p]) 
                             for s in model.RP_TS[r,p] for (c,ie) in model.RP_CIE[r,p])) if model.RTP_IPRI[r,p,t,cur] else 0)
                       for t in model.MILEYR if model.RTP_VARA[r,p,t]) for p in model.PROCESS if model.ISRP[r,p]) == model.RegObj['OBJVAR',r,cur])
+
 model.EQ_OBJVAR = Constraint(model.RDCUR, rule=EQ_OBJVAR)
+
 #
 # ------- Activity to Primary Group -------
 #
+
 def EQ_ACTFLO(model,r,v,t,p,s):
     if model.PRC_ACT[r,p] and s in model.RP_TS[r,p]:
         return (model.RTP_VARA[r,p,t] * model.PrcAct[r,v,t,p,s] == sum((sum(model.IreFlo[r,v,t,p,c,s,ie] 
@@ -254,9 +279,11 @@ def EQ_ACTFLO(model,r,v,t,p,s):
     else:
         return Constraint.Skip
 model.EQ_ACTFLO = Constraint(model.RTP_VINTYR, model.TSLICE, rule=EQ_ACTFLO)
+
 #
 # ------- Activity to Capacity -------
 #
+
 def EQL_CAPACT(model,r,v,y,p,s):
     if s in model.RTP_AFS[r,y,p,'UP']:
         return ((sum(model.PrcAct[r,v,y,p,ts] * model.RS_FR[r,ts,s] * exp(model.PRC_SC[r,p])/model.RS_STGPRD[r,s] for ts in model.RP_TS[r,p] if model.RS_FR[r,s,ts]) if model.RP_STG[r,p] else 
@@ -265,6 +292,7 @@ def EQL_CAPACT(model,r,v,y,p,s):
                     sum(model.COEF_AF[r,m,y,p,s,'UP'] * model.COEF_CPT[r,m,y,p]*((model.PrcNcap[r,m,p] if model.MILE[m] else 0)+model.NCAP_PASTI[r,m,p]) for m in model.RTP_CPT[r,y,p]))))
     else:
         return Constraint.Skip
+
 model.EQL_CAPACT = Constraint(model.RTP_VINTYR, model.TSLICE, rule=EQL_CAPACT)
 
 def EQE_CAPACT(model,r,v,y,p,s):
@@ -275,16 +303,20 @@ def EQE_CAPACT(model,r,v,y,p,s):
                     sum(model.COEF_AF[r,m,y,p,s,'FX'] * model.COEF_CPT[r,m,y,p]*((model.PrcNcap[r,m,p] if model.MILE[m] else 0)+model.NCAP_PASTI[r,m,p]) for m in model.RTP_CPT[r,y,p]))))
     else:
         return Constraint.Skip
+
 model.EQE_CAPACT = Constraint(model.RTP_VINTYR, model.TSLICE, rule=EQE_CAPACT)
+
 #
 # ------- Capacity Transfer -------
 #
+
 def EQE_CPT(model,r,y,p):
     if model.RTP_VARP[r,y,p] or model.CAP_BND[r,y,p,'FX']:
         return ((model.PrcCap[r,y,p] if model.RTP_VARP[r,y,p] else model.CAP_BND[r,y,p,'FX']) == sum(model.COEF_CPT[r,v,y,p] *
                ((model.MILE[v] * model.PrcNcap[r,v,p]) + model.NCAP_PASTI[r,v,p]) for v in model.RTP_CPT[r,y,p]))
     else:
         return Constraint.Skip
+
 model.EQE_CPT = Constraint(model.RTP, rule=EQE_CPT)
 
 def EQL_CPT(model,r,y,p):
@@ -293,6 +325,7 @@ def EQL_CPT(model,r,y,p):
                ((model.MILE[v] * model.PrcNcap[r,v,p]) + model.NCAP_PASTI[r,v,p]) for v in model.RTP_CPT[r,y,p]))
     else:
         return Constraint.Skip
+
 model.EQL_CPT = Constraint(model.RTP, rule=EQL_CPT)
 
 def EQG_CPT(model,r,y,p):
@@ -301,16 +334,20 @@ def EQG_CPT(model,r,y,p):
                ((model.MILE[v] * model.PrcNcap[r,v,p]) + model.NCAP_PASTI[r,v,p]) for v in model.RTP_CPT[r,y,p]))
     else:
         return Constraint.Skip
+
 model.EQG_CPT = Constraint(model.RTP, rule=EQG_CPT)
+
 #
 # ------- Process Flow Shares -------
 #
+
 def EQL_FLOSHR(model,r,v,p,c,cg,s,l,t):
     if model.RTP_VARA[r,p,t] and v in model.RTP_VNT[r,t,p] and s in model.RPC_TS[r,p,c] and l=='LO':
         return (sum(model.FLO_SHAR[r,v,p,c,cg,s,l] * sum(model.PrcFlo[r,v,t,p,com,ts] * model.RS_FR[r,s,ts] for com in model.RPIO_C[r,p,io] for ts in model.RPC_TS[r,p,com] 
                         if model.COM_ISMEM[r,cg,com] and model.RS_FR[r,s,ts]) for io in model.INOUT if c in model.RPIO_C[r,p,io]) <=  model.PrcFlo[r,v,t,p,c,s])
     else:
         return Constraint.Skip
+
 model.EQL_FLOSHR = Constraint(model.IS_SHAR,model.MILEYR, rule=EQL_FLOSHR)
 
 def EQG_FLOSHR(model,r,v,p,c,cg,s,l,t):
@@ -319,6 +356,7 @@ def EQG_FLOSHR(model,r,v,p,c,cg,s,l,t):
                         if model.COM_ISMEM[r,cg,com] and model.RS_FR[r,s,ts]) for io in model.INOUT if c in model.RPIO_C[r,p,io]) >=  model.PrcFlo[r,v,t,p,c,s])
     else:
         return Constraint.Skip
+
 model.EQG_FLOSHR = Constraint(model.IS_SHAR,model.MILEYR, rule=EQG_FLOSHR)
 
 def EQE_FLOSHR(model,r,v,p,c,cg,s,l,t):
@@ -327,10 +365,13 @@ def EQE_FLOSHR(model,r,v,p,c,cg,s,l,t):
                         if model.COM_ISMEM[r,cg,com] and model.RS_FR[r,s,ts]) for io in model.INOUT if c in model.RPIO_C[r,p,io]) ==  model.PrcFlo[r,v,t,p,c,s])
     else:
         return Constraint.Skip
+
 model.EQE_FLOSHR = Constraint(model.IS_SHAR,model.MILEYR, rule=EQE_FLOSHR)
+
 #
 # ------- Activity efficiency -------
 #
+
 def EQE_ACTEFF(model,r,p,cg,io,t,v,s):
 #    if not model.RTP_VARA[r,p,t]:
 #        v = Set()
@@ -342,10 +383,13 @@ def EQE_ACTEFF(model,r,p,cg,io,t,v,s):
                     (model.ACT_EFF[r,v,p,c,ts] if model.ACT_EFF[r,v,p,c,ts] else 1) * (1+model.RTCS_FR[r,t,c,s,ts]) for c in model.RP_PGC[r,p]) if model.RP_PGFLO[r,p] else model.PrcAct[r,v,t,p,ts]) / max(1e-6,model.ACT_EFF[r,v,p,cg,ts]) for ts in model.RP_TS[r,p] if model.RS_FR[r,s,ts]))
     else:
         return Constraint.Skip
+
 model.EQE_ACTEFF = Constraint(model.RPG_ACE,model.MILEYR, model.MODLYR, model.TSLICE, rule=EQE_ACTEFF)
+
 #
 # ------- Process Transformation -------
 #
+
 def EQ_PTRANS(model,r,p,cg1,cg2,s1,t,v,s):
 #    if not model.RTP_VARA[r,p,t]:
 #        v = Set()
@@ -355,10 +399,13 @@ def EQ_PTRANS(model,r,p,cg1,cg2,s1,t,v,s):
                 sum(model.COEF_PTRAN[r,v,p,cg1,c,cg2,ts] * model.RS_FR[r,s,ts] * (1 + model.RTCS_FR[r,t,c,s,ts]) * model.PrcFlo[r,v,t,p,c,ts] for io in model.INOUT for c in model.RPIO_C[r,p,io] for ts in model.RPC_TS[r,p,c] if (model.COEF_PTRAN[r,v,p,cg1,c,cg2,ts] if model.RS_FR[r,s,ts] else 0)))
     else:
         return Constraint.Skip
+
 model.EQ_PTRANS = Constraint(model.RP_PTRAN, model.MILEYR, model.MODLYR, model.TSLICE, rule=EQ_PTRANS)
+
 #
 # ------- Commodity Balance = -------
 #
+
 def EQG_COMBAL(model,r,t,c,s):
     if (r,t,c,s,'LO') in model.RCS_COMBAL:
         return ((model.ComPrd[r,t,c,s] if model.RHS_COMPRD[r,t,c,s] else (
@@ -372,10 +419,13 @@ def EQG_COMBAL(model,r,t,c,s):
                 (model.COM_PROJ[r,t,c] * model.COM_FR[r,t,c,s] if model.COM_PROJ[r,t,c] else 0)) 
     else:
         return Constraint.Skip
+
 model.EQG_COMBAL = Constraint(model.REGION, model.MILEYR, model.COMMTY, model.TSLICE, rule=EQG_COMBAL)
+
 #
 # ------- Commodity Balance = -------
 #
+
 def EQE_COMBAL(model,r,t,c,s):
     if (r,t,c,s,'FX') in model.RCS_COMBAL:
         return ((model.ComPrd[r,t,c,s] if model.RHS_COMPRD[r,t,c,s] else (
@@ -390,9 +440,11 @@ def EQE_COMBAL(model,r,t,c,s):
     else:
         return Constraint.Skip
 model.EQE_COMBAL = Constraint(model.REGION, model.MILEYR, model.COMMTY, model.TSLICE, rule=EQE_COMBAL)
+
 #
 # ------- Commodity Production -------
 #
+
 def EQE_COMPRD(model,r,t,c,s):
     if (r,t,c,s,'FX') in model.RCS_COMPRD: 
         return (sum((sum(sum(model.StgFlo[r,v,t,p,c,ts,'OUT'] * model.RS_FR[r,s,ts] * (1+model.RTCS_FR[r,t,c,s,ts]) * model.STG_EFF[r,v,p] for v in model.RTP_VNT[r,t,p]) 
@@ -403,9 +455,11 @@ def EQE_COMPRD(model,r,t,c,s):
     else: 
         return Constraint.Skip
 model.EQE_COMPRD = Constraint(model.REGION, model.MILEYR, model.COMMTY, model.TSLICE, rule=EQE_COMPRD)
+
 #
 # ------- Timeslice Storage Transformation -------
 #
+
 def EQ_STGTSS(model,r,v,y,p,s):
     if (r,p,s) in model.RPS_STG:
         return (model.PrcAct[r,v,y,p,s] == sum((model.PrcAct[r,v,y,p,all_s] + model.STG_CHRG[r,y,p,all_s] + sum(model.StgFlo[r,v,y,p,c,all_s,io] / 
@@ -414,10 +468,13 @@ def EQ_STGTSS(model,r,v,y,p,s):
                      model.RS_STGPRD[r,s])) + max(0, model.STG_LOSS[r,v,p,all_s]) * model.G_YRFR[r,all_s] / model.RS_STGPRD[r,s])) for all_s in model.TSLICE if (r,s,all_s) in model.RS_PRETS))
     else:
         return Constraint.Skip
+
 model.EQ_STGTSS = Constraint(model.RTP_VINTYR, model.TSLICE, rule=EQ_STGTSS)
+
 #
 # ------- Output -------
 #
+
 model.dual = Suffix(direction=Suffix.IMPORT)
 model.rc = Suffix(direction=Suffix.IMPORT)
 

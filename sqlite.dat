@@ -33,7 +33,7 @@ load "PROTO.db3" using=sqlite3 query="SELECT ALL_REG,P,C,IE FROM RPC_IRE" : RPC_
 load "PROTO.db3" using=sqlite3 query="SELECT R,P,C,1 FROM RPC_STG" : [R,P,C] RPC_STG=1;
 load "PROTO.db3" using=sqlite3 query="SELECT REG,PRC,COM FROM PRC_STGTSS" : PRC_STGTSS;
 load "PROTO.db3" using=sqlite3 query="SELECT R,P,CG,IO FROM RPG_ACE" : RPG_ACE;
-load "PROTO.db3" using=sqlite3 query="SELECT R,P,CG FROM RPC_ACE" : RPC_ACE;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,PRC,CG FROM RPC_ACE" : RPC_ACE;
 load "PROTO.db3" using=sqlite3 query="SELECT R,T,P,S,BD FROM AFS" : AFS;
 load "PROTO.db3" using=sqlite3 query="SELECT R,ALLYEAR,P FROM RTP" : RTP;
 load "PROTO.db3" using=sqlite3 query="SELECT R,ALLYEAR,P,1 FROM RTP_VARA" : [R,P,ALLYEAR] RTP_VARA=1;
@@ -41,7 +41,7 @@ load "PROTO.db3" using=sqlite3 query="SELECT R,ALLYEAR,P,CUR,1 FROM RTP_IPRI" : 
 load "PROTO.db3" using=sqlite3 query="SELECT R,T,P,1 FROM RTP_VARP" : [R,T,P] RTP_VARP=1;
 load "PROTO.db3" using=sqlite3 query="SELECT R,P,C,ALL_TS FROM RPCS_VAR" : RPCS_VAR;
 load "PROTO.db3" using=sqlite3 query="SELECT REG,PRC,CG,CG2 FROM RPCC_FFUNC" : RPCC_FFUNC;
-load "PROTO.db3" using=sqlite3 query="SELECT ALL_REG,ALLYEAR,ALLYEAR2,PRC FROM RTP_VINTYR" : RTP_VINTYR;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,ALLYEAR2,PRC FROM RTP_VINTYR" : RTP_VINTYR;
 load "PROTO.db3" using=sqlite3 query="SELECT R,ALLYEAR,C,ALL_TS FROM RTCS_VARC" : RTCS;
 load "PROTO.db3" using=sqlite3 query="SELECT R,ALLYEAR,C,S,LIM FROM RCS_COMBAL" : RCS_COMBAL;
 load "PROTO.db3" using=sqlite3 query="SELECT R,ALLYEAR,C,S,LIM FROM RCS_COMPRD" : RCS_COMPRD;
@@ -50,33 +50,33 @@ load "PROTO.db3" using=sqlite3 query="SELECT R,P,CG,CG2,S FROM RPFF_GGS" : RP_PT
 
 
 #======= Load parameter data
-load "PROTO.db3" using=sqlite3 query="SELECT ALL_REG,TS,VALUE FROM G_YRFR" : [ALL_REG,TS] G_YRFR=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT R,ALL_TS,VALUE FROM RS_STGPRD" : [R,ALL_TS] RS_STGPRD=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT R,S,S2,VALUE FROM RS_FR" : RS_TREE=[R,S,S2] RS_FR=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT REG,PRC,VALUE FROM PRC_CAPACT" : [REG,PRC] PRC_CAPACT=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT REG,PRC,VALUE FROM PRC_SC" : [REG,PRC] PRC_SC=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT R,ALL_TS,VALUE FROM RS_STGAV" : [R,ALL_TS] RS_STGAV=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT R,T,C,S,S2,VALUE FROM RTCS_FR" : [R,T,C,S,S2] RTCS_FR=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,COM,VALUE FROM COM_PROJ" : RTDEM=[REG,ALLYEAR,COM] COM_PROJ=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,COM,TS,VALUE FROM COM_IE" : [REG,ALLYEAR,COM,TS] COM_IE=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,COM,TS,VALUE FROM COM_FR" : [REG,ALLYEAR,COM,TS] COM_FR=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,VALUE FROM NCAP_PASTI" : [REG,ALLYEAR,PRC] NCAP_PASTI=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,BD,VALUE FROM CAP_BND" : IS_CAPBND=[REG,ALLYEAR,PRC,BD] CAP_BND=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,LIM,VALUE FROM NCAP_BND" : IS_NCAPBD=[REG,ALLYEAR,PRC,LIM] NCAP_BND=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT R,ALLYEAR,T,PRC,VALUE FROM COEF_CPT" : RTP_CPTYR=[R,ALLYEAR,T,PRC] COEF_CPT=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT R,ALLYEAR,T,PRC,S,BD,VALUE FROM COEF_AF" : [R,ALLYEAR,T,PRC,S,BD] COEF_AF=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,CG,C,CG2,S,VALUE FROM COEF_PTRAN" : [REG,ALLYEAR,PRC,CG,C,CG2,S] COEF_PTRAN=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,C,CG,TS,BD,VALUE FROM FLO_SHAR" : IS_SHAR=[REG,ALLYEAR,PRC,C,CG,TS,BD] FLO_SHAR=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,CG,VALUE FROM PRC_ACTFLO" : [REG,ALLYEAR,PRC,CG] PRC_ACTFLO=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,VALUE FROM STG_EFF" : [REG,ALLYEAR,PRC] STG_EFF=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,S,VALUE FROM STG_LOSS" : [REG,ALLYEAR,PRC,S] STG_LOSS=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,S,VALUE FROM STG_CHRG" : [REG,ALLYEAR,PRC,S] STG_CHRG=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,CG,TS,VALUE FROM ACT_EFF" : [REG,ALLYEAR,PRC,CG,TS] ACT_EFF=VALUE;
+load "PROTO.db3" using=sqlite3 query="SELECT ALL_REG,TS,value FROM G_YRFR" : [ALL_REG,TS] G_YRFR=value;
+load "PROTO.db3" using=sqlite3 query="SELECT R,ALL_TS,value FROM RS_STGPRD" : [R,ALL_TS] RS_STGPRD=value;
+load "PROTO.db3" using=sqlite3 query="SELECT R,S,S2,value FROM RS_FR" : RS_TREE=[R,S,S2] RS_FR=value;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,PRC,value FROM PRC_CAPACT" : [REG,PRC] PRC_CAPACT=value;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,PRC,value FROM PRC_SC" : [REG,PRC] PRC_SC=value;
+load "PROTO.db3" using=sqlite3 query="SELECT R,ALL_TS,value FROM RS_STGAV" : [R,ALL_TS] RS_STGAV=value;
+load "PROTO.db3" using=sqlite3 query="SELECT R,T,C,S,S2,value FROM RTCS_FR" : [R,T,C,S,S2] RTCS_FR=value;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,COM,value FROM COM_PROJ" : RTDEM=[REG,ALLYEAR,COM] COM_PROJ=value;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,COM,TS,value FROM COM_IE" : [REG,ALLYEAR,COM,TS] COM_IE=value;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,COM,TS,value FROM COM_FR" : [REG,ALLYEAR,COM,TS] COM_FR=value;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,value FROM NCAP_PASTI" : [REG,ALLYEAR,PRC] NCAP_PASTI=value;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,BD,value FROM CAP_BND" : IS_CAPBND=[REG,ALLYEAR,PRC,BD] CAP_BND=value;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,LIM,value FROM NCAP_BND" : IS_NCAPBD=[REG,ALLYEAR,PRC,LIM] NCAP_BND=value;
+load "PROTO.db3" using=sqlite3 query="SELECT R,ALLYEAR,T,PRC,value FROM COEF_CPT" : RTP_CPTYR=[R,ALLYEAR,T,PRC] COEF_CPT=value;
+load "PROTO.db3" using=sqlite3 query="SELECT R,ALLYEAR,T,PRC,S,BD,value FROM COEF_AF" : [R,ALLYEAR,T,PRC,S,BD] COEF_AF=value;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,CG,C,CG2,TS,value FROM COEF_PTRAN" : [REG,ALLYEAR,PRC,CG,C,CG2,TS] COEF_PTRAN=value;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,C,CG,TS,BD,value FROM FLO_SHAR" : IS_SHAR=[REG,ALLYEAR,PRC,C,CG,TS,BD] FLO_SHAR=value;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,CG,value FROM PRC_ACTFLO" : [REG,ALLYEAR,PRC,CG] PRC_ACTFLO=value;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,value FROM STG_EFF" : [REG,ALLYEAR,PRC] STG_EFF=value;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,S,value FROM STG_LOSS" : [REG,ALLYEAR,PRC,S] STG_LOSS=value;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,ALLYEAR,PRC,S,value FROM STG_CHRG" : [REG,ALLYEAR,PRC,S] STG_CHRG=value;
+load "PROTO.db3" using=sqlite3 query="SELECT REG,YEAR,PRC,CG,TS,value FROM ACT_EFF" : [REG,YEAR,PRC,CG,TS] ACT_EFF=value;
 
 #======= Cost parameter data
-load "PROTO.db3" using=sqlite3 query="SELECT R,YEAR,CUR,VALUE FROM OBJ_PVT" : [R,YEAR,CUR] OBJ_PVT=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT R,T,ALLYEAR,CUR,VALUE FROM OBJ_LINT" : IS_LINT=[R,T,ALLYEAR,CUR] OBJ_LINT=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT R,P,CUR,ALLYEAR,VALUE FROM OB_ACT" : IS_ACOST=[R,ALLYEAR,P,CUR] OBJ_ACOST=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT R,ALLYEAR,P,C,S,IE,CUR,VALUE FROM OBJ_IPRIC" : [R,ALLYEAR,P,C,S,IE,CUR] OBJ_IPRIC=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT R,ALLYEAR,P,CUR,VALUE FROM COEF_OBINV" : [R,ALLYEAR,P,CUR] COEF_OBINV=VALUE;
-load "PROTO.db3" using=sqlite3 query="SELECT R,ALLYEAR,P,CUR,VALUE FROM COEF_OBFIX" : [R,ALLYEAR,P,CUR] COEF_OBFIX=VALUE;
+load "PROTO.db3" using=sqlite3 query="SELECT R,YEAR,CUR,value FROM OBJ_PVT" : [R,YEAR,CUR] OBJ_PVT=value;
+load "PROTO.db3" using=sqlite3 query="SELECT R,T,ALLYEAR,CUR,value FROM OBJ_LINT" : IS_LINT=[R,T,ALLYEAR,CUR] OBJ_LINT=value;
+load "PROTO.db3" using=sqlite3 query="SELECT R,P,CUR,ALLYEAR,value FROM OB_ACT" : IS_ACOST=[R,ALLYEAR,P,CUR] OBJ_ACOST=value;
+load "PROTO.db3" using=sqlite3 query="SELECT R,ALLYEAR,P,C,S,IE,CUR,value FROM OBJ_IPRIC" : [R,ALLYEAR,P,C,S,IE,CUR] OBJ_IPRIC=value;
+load "PROTO.db3" using=sqlite3 query="SELECT R,YEAR,P,CUR,value FROM COEF_OBINV" : [R,YEAR,P,CUR] COEF_OBINV=value;
+load "PROTO.db3" using=sqlite3 query="SELECT R,YEAR,P,CUR,value FROM COEF_OBFIX" : [R,YEAR,P,CUR] COEF_OBFIX=value;

@@ -6,6 +6,7 @@ Created on Thu Jun  7 12:17:55 2018
 """
 
 import pandas as pd
+import numpy as np
 
 def get_duals(instance, anEq):
     duals={}
@@ -27,9 +28,9 @@ def get_rc(instance, aVar):
     
 def clean_df(df):
     df[df < 1e-12] = 0
-    df.replace(0, pd.np.nan, inplace=True)
+    df.replace(0, np.nan, inplace=True)
     df.dropna(thresh=1, inplace=True)
-    df.replace(pd.np.nan, 0, inplace=True)
+    df.replace(np.nan, 0, inplace=True)
 
 
 def mi_df(dict_level, dict_duals, index):
