@@ -4,7 +4,7 @@ from math import exp
 
 model = AbstractModel()
 
-# ======= System sets
+# %% System sets
 model.YEAR = Set(initialize=[0]) | RangeSet(1900,2200)
 model.INOUT	= Set()
 model.IMPEXP = Set()
@@ -18,7 +18,7 @@ model.UC_NAME = Set()
 model.UC_COST = Set(within=model.UC_NAME)
 model.COSTAGG = Set()
 
-# ======= User input sets
+# %% User input sets
 model.MILEYR = Set(within=model.YEAR)
 model.MODLYR = Set(within=model.YEAR)
 model.TSLICE = Set()
@@ -28,7 +28,7 @@ model.COMMTY = Set()
 model.COMGRP = Set()
 model.CURENCY = Set()
 
-# ======= Internal sets (all simple sets for now)
+# %% Internal sets (all simple sets for now)
 model.OBV = Set()
 model.TS_MAP = Set(within=model.REGION * model.TSLICE * model.TSLICE)
 model.RS_TREE = Set(within=model.REGION * model.TSLICE * model.TSLICE)
@@ -79,9 +79,7 @@ model.RP_PTRAN = Set(within=model.REGION * model.PROCESS * model.COMGRP * model.
 model.IS_SHAR = Set(within=model.REGION * model.YEAR * model.PROCESS * model.COMMTY * model.COMGRP * model.TSLICE * model.LIM)
 model.IS_ACOST = Set(within=model.REGION * model.MODLYR * model.PROCESS * model.CURENCY)
 
-# ============================================================================
-
-# ======= Parameters
+# %% Parameters
 model.G_YRFR = Param(model.REGION, model.TSLICE)
 model.RS_STGPRD = Param(model.REGION, model.TSLICE)
 model.RS_STGAV = Param(model.REGION, model.TSLICE)
@@ -105,7 +103,7 @@ model.STG_LOSS = Param(model.REGION, model.YEAR, model.PROCESS, model.TSLICE, de
 model.STG_CHRG = Param(model.REGION, model.YEAR, model.PROCESS, model.TSLICE, default=0)
 model.ACT_EFF = Param(model.REGION, model.YEAR, model.PROCESS, model.COMGRP, model.TSLICE, default=0)
 
-# ======= Cost parameters
+# %% Cost parameters
 model.OBJ_PVT = Param(model.REGION, model.MILEYR, model.CURENCY)
 model.OBJ_LINT = Param(model.REGION, model.MILEYR, model.MODLYR, model.CURENCY, default=0)
 model.OBJ_ACOST = Param(model.REGION, model.MODLYR, model.PROCESS, model.CURENCY, default=0)
@@ -199,9 +197,7 @@ def RP_ACE(model,r,p):
 
 model.RP_ACE = Set(model.RP, initialize=RP_ACE)
 
-# ============================================================================
-
-# ======= Variables
+# %% Variables
 model.RegObj  = Var(model.OBV, model.REGION, model.CURENCY, within=NonNegativeReals, dense=False)
 model.ComPrd  = Var(model.REGION, model.MILEYR, model.COMMTY, model.TSLICE, within=NonNegativeReals, dense=False)
 model.ComNet  = Var(model.REGION, model.MILEYR, model.COMMTY, model.TSLICE, within=NonNegativeReals, dense=False)
@@ -235,8 +231,8 @@ model.PrcFlo  = Var(model.REGION, model.YEAR, model.MILEYR, model.PROCESS, model
 model.IreFlo  = Var(model.REGION, model.YEAR, model.MILEYR, model.PROCESS, model.COMMTY, model.TSLICE, model.IMPEXP, within=NonNegativeReals, dense=False)
 model.StgFlo  = Var(model.REGION, model.YEAR, model.MILEYR, model.PROCESS, model.COMMTY, model.TSLICE, model.INOUT, within=NonNegativeReals, dense=False)
 
-# ============================================================================
-#
+
+# %% Objective Function
 
 def obj_rule(model):
 	return sum(model.RegObj[o,r,cur] for o in model.OBV for (r,cur) in model.RDCUR)
@@ -268,9 +264,8 @@ def EQ_OBJVAR(model,r,cur):
 
 model.EQ_OBJVAR = Constraint(model.RDCUR, rule=EQ_OBJVAR)
 
-#
-# ------- Activity to Primary Group -------
-#
+
+# %% Activity to Primary Group
 
 def EQ_ACTFLO(model,r,v,t,p,s):
     if model.PRC_ACT[r,p] and s in model.RP_TS[r,p]:
@@ -280,9 +275,8 @@ def EQ_ACTFLO(model,r,v,t,p,s):
         return Constraint.Skip
 model.EQ_ACTFLO = Constraint(model.RTP_VINTYR, model.TSLICE, rule=EQ_ACTFLO)
 
-#
-# ------- Activity to Capacity -------
-#
+
+# %% Activity to Capacity
 
 def EQL_CAPACT(model,r,v,y,p,s):
     if s in model.RTP_AFS[r,y,p,'UP']:
@@ -306,9 +300,8 @@ def EQE_CAPACT(model,r,v,y,p,s):
 
 model.EQE_CAPACT = Constraint(model.RTP_VINTYR, model.TSLICE, rule=EQE_CAPACT)
 
-#
-# ------- Capacity Transfer -------
-#
+
+# %% Capacity Transfer
 
 def EQE_CPT(model,r,y,p):
     if model.RTP_VARP[r,y,p] or model.CAP_BND[r,y,p,'FX']:
@@ -337,9 +330,8 @@ def EQG_CPT(model,r,y,p):
 
 model.EQG_CPT = Constraint(model.RTP, rule=EQG_CPT)
 
-#
-# ------- Process Flow Shares -------
-#
+
+# %% Process Flow Shares
 
 def EQL_FLOSHR(model,r,v,p,c,cg,s,l,t):
     if model.RTP_VARA[r,p,t] and v in model.RTP_VNT[r,t,p] and s in model.RPC_TS[r,p,c] and l=='LO':
@@ -368,9 +360,8 @@ def EQE_FLOSHR(model,r,v,p,c,cg,s,l,t):
 
 model.EQE_FLOSHR = Constraint(model.IS_SHAR,model.MILEYR, rule=EQE_FLOSHR)
 
-#
-# ------- Activity efficiency -------
-#
+
+# %% Activity efficiency
 
 def EQE_ACTEFF(model,r,p,cg,io,t,v,s):
 #    if not model.RTP_VARA[r,p,t]:
@@ -386,9 +377,8 @@ def EQE_ACTEFF(model,r,p,cg,io,t,v,s):
 
 model.EQE_ACTEFF = Constraint(model.RPG_ACE,model.MILEYR, model.MODLYR, model.TSLICE, rule=EQE_ACTEFF)
 
-#
-# ------- Process Transformation -------
-#
+
+# %% Process Transformation
 
 def EQ_PTRANS(model,r,p,cg1,cg2,s1,t,v,s):
 #    if not model.RTP_VARA[r,p,t]:
@@ -402,9 +392,8 @@ def EQ_PTRANS(model,r,p,cg1,cg2,s1,t,v,s):
 
 model.EQ_PTRANS = Constraint(model.RP_PTRAN, model.MILEYR, model.MODLYR, model.TSLICE, rule=EQ_PTRANS)
 
-#
-# ------- Commodity Balance = -------
-#
+
+# %% Commodity Balance - Greater
 
 def EQG_COMBAL(model,r,t,c,s):
     if (r,t,c,s,'LO') in model.RCS_COMBAL:
@@ -422,9 +411,8 @@ def EQG_COMBAL(model,r,t,c,s):
 
 model.EQG_COMBAL = Constraint(model.REGION, model.MILEYR, model.COMMTY, model.TSLICE, rule=EQG_COMBAL)
 
-#
-# ------- Commodity Balance = -------
-#
+
+# %% Commodity Balance - Equal
 
 def EQE_COMBAL(model,r,t,c,s):
     if (r,t,c,s,'FX') in model.RCS_COMBAL:
@@ -441,9 +429,8 @@ def EQE_COMBAL(model,r,t,c,s):
         return Constraint.Skip
 model.EQE_COMBAL = Constraint(model.REGION, model.MILEYR, model.COMMTY, model.TSLICE, rule=EQE_COMBAL)
 
-#
-# ------- Commodity Production -------
-#
+
+# %% Commodity Production
 
 def EQE_COMPRD(model,r,t,c,s):
     if (r,t,c,s,'FX') in model.RCS_COMPRD: 
@@ -456,9 +443,8 @@ def EQE_COMPRD(model,r,t,c,s):
         return Constraint.Skip
 model.EQE_COMPRD = Constraint(model.REGION, model.MILEYR, model.COMMTY, model.TSLICE, rule=EQE_COMPRD)
 
-#
-# ------- Timeslice Storage Transformation -------
-#
+
+# %% Timeslice Storage Transformation
 
 def EQ_STGTSS(model,r,v,y,p,s):
     if (r,p,s) in model.RPS_STG:
@@ -471,9 +457,8 @@ def EQ_STGTSS(model,r,v,y,p,s):
 
 model.EQ_STGTSS = Constraint(model.RTP_VINTYR, model.TSLICE, rule=EQ_STGTSS)
 
-#
-# ------- Output -------
-#
+
+# %% Output
 
 model.dual = Suffix(direction=Suffix.IMPORT)
 model.rc = Suffix(direction=Suffix.IMPORT)
@@ -571,5 +556,4 @@ def pyomo_save_results(options, instance, results):
 #    result_series = pd.Series(list_of_vars,index=var_names)
 #    result_series.to_csv('my_results.csv')
 
-# ============================================================================
 
