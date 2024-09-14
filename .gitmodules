@@ -1,0 +1,3 @@
+[submodule "TIMES source code"]
+	path = source
+	url = https://github.com/etsap-TIMES/TIMES_model.git
