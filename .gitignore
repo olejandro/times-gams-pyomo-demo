@@ -4,3 +4,4 @@ END_GAMS
 *.db3
 *.log
 *.vd*
+__pycache__/*.*
