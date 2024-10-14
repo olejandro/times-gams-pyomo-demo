@@ -8,3 +8,8 @@ To execute GAMS only example run:
 python -m gamsrun
 ```
 
+To execute GAMS/PYOMO example run:
+
+```
+python -m gamspyomorun
+```

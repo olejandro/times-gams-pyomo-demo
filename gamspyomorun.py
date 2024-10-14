@@ -2,12 +2,13 @@ import subprocess
 from importlib import resources
 
 case = "UTOPIA"
+project_path = resources.files("gamsrun")
 
 # Paths to resources
 gams_path = resources.files("gamspy_base") / "gams.exe"
-gdx2sqlite_path = resources.files("gamsrun") / "GAMS" / "gdx2sqlite.exe"
-gdx2veda_path = resources.files("gamsrun") / "GAMS" / "GDX2VEDA.exe"
-times2veda_path = resources.files("gamsrun") / "source" / "times2veda.vdd"
+gdx2sqlite_path = project_path / "GAMS" / "gdx2sqlite.exe"
+gdx2veda_path = project_path / "GAMS" / "GDX2VEDA.exe"
+times2veda_path = project_path / "source" / "times2veda.vdd"
 
 # Command to execute gams.exe
 gams_command = [
@@ -32,6 +33,18 @@ gdx2sqlite_command = [
 ]
 
 # pyomo solve --solver=glpk --solver-executable=GLPK/glpsol --symbolic-solver-labels --stream-solver --report-timing --tempdir=%cd% tipyomo.py loadall.dat
+pyomo_command = [
+    "pyomo",
+    "solve",
+    "--solver=glpk",
+    "--solver-executable=GLPK/glpsol",
+    "--symbolic-solver-labels",
+    "--stream-solver",
+    "--report-timing",
+    f"--tempdir={project_path}",
+    "tipyomo.py",
+    "loadall.dat",
+]   
 
 # Command to execute gdx2veda.exe
 gdx2veda_command = [
@@ -44,6 +57,6 @@ gdx2veda_command = [
 # Execute subprocesses
 subprocess.run(gams_command)
 subprocess.run(gdx2sqlite_command)
-# run pyomo
-# run GAMS
+subprocess.run(pyomo_command)
+subprocess.run(gams_command)
 subprocess.run(gdx2veda_command)
