@@ -5,3 +5,5 @@ END_GAMS
 *.log
 *.vd*
 __pycache__/*.*
+# Ignore .venv folder
+.venv/
