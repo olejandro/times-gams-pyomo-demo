@@ -4,7 +4,7 @@ from gamspy_base import directory
 from gams.connect import ConnectDatabase
 
 case = "UTOPIA"
-sqlite_file = "PROTO.db3"
+sqlite_file = "model_data.db3"
 project_path = resources.files("gamsrun")
 
 # Paths to resources
@@ -12,12 +12,12 @@ gams_path = resources.files("gamspy_base") / "gams.exe"
 # Raise an error if gams_path does not exist
 if not gams_path.exists():
     raise FileNotFoundError("gams.exe not found in the specified resources.")
-gdx2sqlite_path = project_path / "GAMS" / "gdx2sqlite.exe"
+
 gdx2veda_path = project_path / "GAMS" / "GDX2VEDA.exe"
 times2veda_path = project_path / "source" / "times2veda.vdd"
 
-# Command to execute gams.exe
-gams_command = [
+# Command to create the GDX file
+create_gdx = [
     gams_path,
     f"{case}.RUN",
     "IDIR=source",
@@ -26,20 +26,20 @@ gams_command = [
     "GDXCOMPRESS=1",
     "--EXTSOL=YES",
 ]
-
+subprocess.run(create_gdx)
+# Read the created GDX file and convert it to SQLite
 cdb = ConnectDatabase(system_directory=directory)
-
 # Read the GDX file
 cdb.execute({
     'GDXReader': {
         'file': f"{case}.gdx",
         'symbols': 'all'
         }})
-
 # Check if the sqlite file already exists and delete it if it does
 if (project_path/sqlite_file).exists():
+    print(f"Deleting existing SQLite file: {sqlite_file}")
     (project_path/sqlite_file).unlink()
-
+# Create the SQLite database
 cdb.execute({
     'SQLWriter': {
         'connection': {'database': sqlite_file},
@@ -47,18 +47,6 @@ cdb.execute({
         'connectionType': 'sqlite',
         'symbols': 'all'
         }})
-
-
-# Command to execute gdx2sqlite
-gdx2sqlite_command = [
-    gdx2sqlite_path,
-    "-i",
-    f"{case}.gdx",
-    "-o",
-    "PROTO.db3",
-    "-small",
-    "-fast",
-]
 
 # pyomo solve --solver=glpk --solver-executable=GLPK/glpsol --symbolic-solver-labels --stream-solver --report-timing --tempdir=%cd% tipyomo.py loadall.dat
 pyomo_command = [
@@ -83,8 +71,6 @@ gdx2veda_command = [
 ]
 
 # Execute subprocesses
-subprocess.run(gams_command)
-subprocess.run(gdx2sqlite_command)
 subprocess.run(pyomo_command)
 subprocess.run(gams_command)
 subprocess.run(gdx2veda_command)
