@@ -2,7 +2,8 @@ import subprocess
 from pathlib import Path
 from gamspy_base import directory
 from gams.connect import ConnectDatabase
-from tipyomo import pyomo_times_model 
+from tipyomo import pyomo_times_model
+from pyomo.opt import SolverFactory
 
 case = "UTOPIA"
 sqlite_file = "model_data.db3"
@@ -49,30 +50,9 @@ cdb.execute({
         'skipText': True,
         }})
 
-# pyomo solve --solver=glpk --solver-executable=GLPK/glpsol --symbolic-solver-labels --stream-solver --report-timing --tempdir=%cd% tipyomo.py loadall.dat
-execute_pyomo = [
-    "pyomo",
-    "solve",
-    "--solver=glpk",
-    "--solver-executable=GLPK/glpsol",
-    "--symbolic-solver-labels",
-    "--stream-solver",
-    "--report-timing",
-    f"--tempdir={project_path}",
-    "tipyomo.py",
-    "loadall.dat",
-]   
-subprocess.run(execute_pyomo)
-
-# Command to execute gdx2veda.exe
-gdx2veda_command = [
-    gdx2veda_path,
-    f"{case}",
-    times2veda_path,
-    f"{case}-PYOMO",
-]
-
-# Execute subprocesses
-
-subprocess.run(gams_command)
-subprocess.run(gdx2veda_command)
+# Instantiate the Pyomo model
+instance = pyomo_times_model().create_instance(filename="loadall.dat")
+# Set HiGHS as the solver
+solver = SolverFactory("highs")
+# Solve the model and print the results to the console
+results = solver.solve(instance, tee=True)
