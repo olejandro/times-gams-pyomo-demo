@@ -1,9 +1,12 @@
 *.lst
 *.gdx
+*.gsp
 END_GAMS
 *.db3
 *.log
 *.vd*
+*.csv
+*.
 __pycache__/*.*
 # Ignore .venv folder
 .venv/
