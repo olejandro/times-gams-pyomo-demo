@@ -1242,6 +1242,9 @@ def pyomo_save_results(options, instance, results):
     COMBAL_df = mi_df(COMBAL_level, COMBAL_duals, EQG_COMBAL_cn)
     COMBAL = df2csv(COMBAL_df, EQG_COMBAL_cn, "COMBAL")
 
+# Create a function to use the model in other modules
+def pyomo_times_model():
+    return mdl
 
 # def pyomo_print_results(options, instance, results):
 #    from pyomo.core import Param
