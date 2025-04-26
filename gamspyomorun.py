@@ -1,11 +1,17 @@
 import subprocess
 from importlib import resources
+from gamspy_base import directory
+from gams.connect import ConnectDatabase
 
 case = "UTOPIA"
+sqlite_file = "PROTO.db3"
 project_path = resources.files("gamsrun")
 
 # Paths to resources
 gams_path = resources.files("gamspy_base") / "gams.exe"
+# Raise an error if gams_path does not exist
+if not gams_path.exists():
+    raise FileNotFoundError("gams.exe not found in the specified resources.")
 gdx2sqlite_path = project_path / "GAMS" / "gdx2sqlite.exe"
 gdx2veda_path = project_path / "GAMS" / "GDX2VEDA.exe"
 times2veda_path = project_path / "source" / "times2veda.vdd"
@@ -20,6 +26,28 @@ gams_command = [
     "GDXCOMPRESS=1",
     "--EXTSOL=YES",
 ]
+
+cdb = ConnectDatabase(system_directory=directory)
+
+# Read the GDX file
+cdb.execute({
+    'GDXReader': {
+        'file': f"{case}.gdx",
+        'symbols': 'all'
+        }})
+
+# Check if the sqlite file already exists and delete it if it does
+if (project_path/sqlite_file).exists():
+    (project_path/sqlite_file).unlink()
+
+cdb.execute({
+    'SQLWriter': {
+        'connection': {'database': sqlite_file},
+        'ifExists': 'replace',
+        'connectionType': 'sqlite',
+        'symbols': 'all'
+        }})
+
 
 # Command to execute gdx2sqlite
 gdx2sqlite_command = [
