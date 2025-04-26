@@ -6,7 +6,7 @@ case = "UTOPIA"
 
 # Paths to resources
 gams_path = Path(directory) / "gams.exe"
-gdx2veda_path = Path("GAMS") / "GDX2VEDA.exe"
+gdx2veda_path = Path("libs") / "GDX2VEDA.exe"
 times2veda_path = Path("source") / "times2veda.vdd"
 
 commands = {
